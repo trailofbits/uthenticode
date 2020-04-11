@@ -8,6 +8,7 @@
 
 #include <smolverify.h>
 
+#include <array>
 #include <iomanip>
 #include <iostream>
 
