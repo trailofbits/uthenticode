@@ -523,11 +523,31 @@ std::string calculate_checksum(peparse::parsed_pe *pe, checksum_kind kind) {
 }
 
 bool verify(__attribute__((unused)) peparse::parsed_pe *pe) {
-  // A PE is verified if and only if:
-  // 1. It has one or more Authenticode signatures
-  // 2. All Authenticode signatures verify successfully
-  // 3. All embedded Authenticode checksums verify successfully
-  return false;
+  /* Our verification state.
+   * A PE is said to be verified if all three are true.
+   *
+   * We start verified_signed_data and verified_checksum in the true state
+   * so that we can AND them against each SignedData's results.
+   */
+  bool has_signed_data = false, verified_signed_data = true, verified_checksum = true;
+
+  auto certs = read_certs(pe);
+  for (const auto &cert : certs) {
+    const auto signed_data = cert.as_signed_data();
+    if (!signed_data) {
+      continue;
+    }
+
+    auto embedded_checksum = signed_data->get_checksum();
+
+    has_signed_data = true;
+    verified_signed_data = verified_signed_data && signed_data->verify_signature();
+    verified_checksum =
+        verified_checksum && std::get<std::string>(embedded_checksum) ==
+                                 calculate_checksum(pe, std::get<checksum_kind>(embedded_checksum));
+  }
+
+  return has_signed_data && verified_signed_data && verified_checksum;
 }
 
 }  // namespace smolverify

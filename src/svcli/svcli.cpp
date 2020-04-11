@@ -19,13 +19,15 @@ int main(int argc, char const *argv[]) {
     return 1;
   }
 
-  auto *parsed_pe = peparse::ParsePEFromFile(argv[1]);
-  if (parsed_pe == nullptr) {
+  auto *pe = peparse::ParsePEFromFile(argv[1]);
+  if (pe == nullptr) {
     std::cerr << "pe-parse failure: " << peparse::GetPEErrString() << '\n';
     return 1;
   }
 
-  const auto &certs = smolverify::read_certs(parsed_pe);
+  std::cout << "This PE is " << (smolverify::verify(pe) ? "" : "NOT ") << "verified!\n\n";
+
+  const auto &certs = smolverify::read_certs(pe);
 
   if (certs.empty()) {
     std::cerr << "PE has no certificate data!\n";
@@ -38,8 +40,7 @@ int main(int argc, char const *argv[]) {
   std::array<smolverify::checksum_kind, 3> kinds = {
       checksum_kind::MD5, checksum_kind::SHA1, checksum_kind::SHA256};
   for (const auto &kind : kinds) {
-    std::cout << std::setw(6) << kind << ": " << smolverify::calculate_checksum(parsed_pe, kind)
-              << '\n';
+    std::cout << std::setw(6) << kind << ": " << smolverify::calculate_checksum(pe, kind) << '\n';
   }
   std::cout << '\n';
 
@@ -74,5 +75,5 @@ int main(int argc, char const *argv[]) {
               << "!\n";
   }
 
-  peparse::DestructParsedPE(parsed_pe);
+  peparse::DestructParsedPE(pe);
 }
