@@ -13,7 +13,7 @@ jobs:
   smolverify:
     strategy:
       matrix:
-        platform: ["ubuntu-latest", "macos-latest"]
+        platform: ["ubuntu-latest"]
         build-type: ["Debug", "Release"]
         compiler:
         - { CC: "clang", CXX: "clang++" }
