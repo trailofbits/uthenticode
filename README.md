@@ -1,6 +1,8 @@
 smolverify
 ==========
 
+![CI](https://github.com/woodruffw/smolverify/workflows/CI/badge.svg)
+
 A ˢᵐᵒˡ (small) cross-platform library for verifying
 [Authenticode](https://docs.microsoft.com/en-us/windows-hardware/drivers/install/authenticode)
 digital signatures.
