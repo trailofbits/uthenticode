@@ -24,6 +24,10 @@ jobs:
     runs-on: ${{ matrix.platform }}
     steps:
     - uses: actions/checkout@v2
+    - name: deps
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y doxygen libssl-dev
     - name: build
       env:
         CC: ${{ matrix.compiler.CC }}
@@ -33,3 +37,4 @@ jobs:
         cd build
         cmake -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} -DBUILD_DOCUMENTATION=1 -DBUILD_SVCLI=1 ..
         cmake --build .
+        cmake --build . --target doc
