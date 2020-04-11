@@ -91,6 +91,7 @@ jobs:
         run: |
           mkdir build && cd build
           cmake \
+            -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
             -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
             -DBUILD_SHARED_LIBS=$${{ matrix.build-shared }} \
             -DBUILD_DOCUMENTATION=1 \
