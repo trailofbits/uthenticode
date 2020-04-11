@@ -14,6 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        submodules: true
 
       - name: deps
         run: |
@@ -31,12 +32,14 @@ jobs:
     strategy:
       matrix:
         build-type: ["Debug", "Release"]
+        build-shared: ["0", "1"]
         compiler:
         - { CC: "clang", CXX: "clang++" }
         - { CC: "gcc", CXX: "g++" }
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+      submodules: true
 
     - name: deps
       run: |
@@ -48,6 +51,7 @@ jobs:
         mkdir build && cd build
         cmake \
           -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
+          -DBUILD_SHARED_LIBS=$${{ matrix.build-shared }} \
           -DBUILD_DOCUMENTATION=1 \
           -DBUILD_SVCLI=1 \
           ..
@@ -67,12 +71,14 @@ jobs:
     strategy:
       matrix:
         build-type: ["Debug", "Release"]
+        build-shared: ["0", "1"]
         compiler:
         - { CC: "clang", CXX: "clang++" }
         - { CC: "gcc", CXX: "g++" }
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
+        submodules: true
 
       - name: deps
         run: |
@@ -83,6 +89,7 @@ jobs:
           mkdir build && cd build
           cmake \
             -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
+            -DBUILD_SHARED_LIBS=$${{ matrix.build-shared }} \
             -DBUILD_DOCUMENTATION=1 \
             -DBUILD_SVCLI=1 \
             ..

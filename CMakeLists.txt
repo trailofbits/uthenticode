@@ -8,22 +8,9 @@ string(STRIP "${SMOLVERIFY_VERSION}" SMOLVERIFY_VERSION)
 add_compile_definitions(SMOLVERIFY_VERSION="${SMOLVERIFY_VERSION}")
 
 if(NOT PEPARSE_DIR)
-  include(ExternalProject)
-  ExternalProject_Add(
-    pe-parse
-    PREFIX external
-    GIT_REPOSITORY https://github.com/trailofbits/pe-parse
-    INSTALL_COMMAND ""
-  )
-
-  include_directories(
-    "${CMAKE_CURRENT_BINARY_DIR}/external/src/pe-parse/pe-parser-library/include"
-  )
-  link_directories("${CMAKE_CURRENT_BINARY_DIR}/external/src/pe-parse-build/pe-parser-library")
+  add_subdirectory("${PROJECT_SOURCE_DIR}/pe-parse")
 else()
-  add_subdirectory("${PEPARSE_DIR}")
-  include_directories("${PEPARSE_DIR}/pe-parser-library/include")
-  link_directories(build/pe-parse/pe-parser-library/${CMAKE_BUILD_TYPE})
+  add_subdirectory("${PEPARSE_DIR}" pe-parse)
 endif()
 
 add_subdirectory(src)
