@@ -14,7 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-        submodules: true
+        with:
+          submodules: true
 
       - name: deps
         run: |
@@ -39,7 +40,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-      submodules: true
+      with:
+        submodules: true
 
     - name: deps
       run: |
@@ -78,7 +80,8 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
-        submodules: true
+        with:
+          submodules: true
 
       - name: deps
         run: |
