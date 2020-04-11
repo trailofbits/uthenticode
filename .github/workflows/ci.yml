@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  schedule:
+    # run CI every day even if no PRs/merges occur
+    - cron:  '0 12 * * *'
+
+jobs:
+  smolverify:
+    strategy:
+      matrix:
+        platform: ["ubuntu-latest", "macos-latest"]
+        build-type: ["Debug", "Release"]
+        compiler:
+        - { CC: "clang", CXX: "clang++" }
+        - { CC: "gcc", CXX: "g++" }
+        exclude:
+        - platform: macos-latest
+          compiler: { CC: "gcc", CXX: "g++" }
+    runs-on: ${{ matrix.platform }}
+    steps:
+    - uses: actions/checkout@v2
+    - name: build
+      env:
+        CC: ${{ matrix.compiler.CC }}
+        CXX: ${{ matrix.compiler.CXX }}
+      run: |
+        mkdir build
+        cd build
+        cmake -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} -DBUILD_DOCUMENTATION=1 -DBUILD_SVCLI=1 ..
+        cmake --build .
