@@ -26,18 +26,15 @@ jobs:
           cmake ..
           cmake --build . --target format
           cd .. && git diff --exit-code
-  build:
+
+  build-linux:
     strategy:
       matrix:
-        platform: ["ubuntu-latest"]
         build-type: ["Debug", "Release"]
         compiler:
         - { CC: "clang", CXX: "clang++" }
         - { CC: "gcc", CXX: "g++" }
-        exclude:
-        - platform: macos-latest
-          compiler: { CC: "gcc", CXX: "g++" }
-    runs-on: ${{ matrix.platform }}
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
 
@@ -65,3 +62,37 @@ jobs:
     - name: docs
       working-directory: build
       run: cmake --build . --target doc
+
+  build-macos:
+    strategy:
+      matrix:
+        build-type: ["Debug", "Release"]
+        compiler:
+        - { CC: "clang", CXX: "clang++" }
+        - { CC: "gcc", CXX: "g++" }
+        exclude:
+        - platform: macos-latest
+          compiler: { CC: "gcc", CXX: "g++" }
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: deps
+        run: |
+          brew install openssl
+
+      - name: configure
+        run: |
+          mkdir build && cd build
+          cmake \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
+            -DBUILD_DOCUMENTATION=1 \
+            -DBUILD_SVCLI=1 \
+            ..
+
+      - name: build
+        working-directory: build
+        env:
+          CC: ${{ matrix.compiler.CC }}
+          CXX: ${{ matrix.compiler.CXX }}
+        run: cmake --build .
