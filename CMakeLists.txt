@@ -35,6 +35,7 @@ endif()
 find_package(Doxygen)
 option(BUILD_DOCUMENTATION "build HTML documentation for smolverify" ${DOXYGEN_FOUND})
 
+# `doc` target.
 if(BUILD_DOCUMENTATION)
   if(NOT DOXYGEN_FOUND)
     message(FATAL_ERROR "Doxygen is required")
@@ -49,7 +50,17 @@ if(BUILD_DOCUMENTATION)
     doc
     COMMAND "${DOXYGEN_EXECUTABLE}" "${doxyfile}"
     WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-    COMMENT "Generating API documentation with Doxygen"
+    COMMENT "Generate API documentation with Doxygen"
     VERBATIM
   )
 endif()
+
+# `format` target.
+file(GLOB_RECURSE SMOLVERIFY_ALL_SOURCES src/*.cpp src/*.h)
+add_custom_target(
+  format
+  COMMAND clang-format -i -style=file ${SMOLVERIFY_ALL_SOURCES}
+  WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
+  COMMENT "Auto-format the codebase with clang-format"
+  VERBATIM
+)
