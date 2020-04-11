@@ -70,9 +70,6 @@ jobs:
         compiler:
         - { CC: "clang", CXX: "clang++" }
         - { CC: "gcc", CXX: "g++" }
-        exclude:
-        - platform: macos-latest
-          compiler: { CC: "gcc", CXX: "g++" }
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
