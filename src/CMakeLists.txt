@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 
 project(smolverify)
 
-find_package(ICU COMPONENTS uc REQUIRED)
 find_package(OpenSSL 1.1 COMPONENTS Crypto REQUIRED)
 
 add_library("${PROJECT_NAME}" smolverify.cpp)
@@ -14,7 +13,6 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 endif()
 
 target_include_directories("${PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
-target_link_libraries("${PROJECT_NAME}" pe-parser-library)
 
-target_link_libraries("${PROJECT_NAME}" ICU::uc)
+target_link_libraries("${PROJECT_NAME}" pe-parser-library)
 target_link_libraries("${PROJECT_NAME}" OpenSSL::Crypto)

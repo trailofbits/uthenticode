@@ -1,0 +1,105 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  schedule:
+    # run CI every day even if no PRs/merges occur
+    - cron:  '0 12 * * *'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - name: deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-format
+
+      - name: lint
+        run: |
+          mkdir build && cd build
+          cmake ..
+          cmake --build . --target format
+          cd .. && git diff --exit-code
+
+  build-linux:
+    strategy:
+      matrix:
+        build-type: ["Debug", "Release"]
+        build-shared: ["0", "1"]
+        compiler:
+        - { CC: "clang", CXX: "clang++" }
+        - { CC: "gcc", CXX: "g++" }
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - name: deps
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y doxygen libssl-dev
+
+    - name: configure
+      run: |
+        mkdir build && cd build
+        cmake \
+          -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
+          -DBUILD_SHARED_LIBS=$${{ matrix.build-shared }} \
+          -DBUILD_DOCUMENTATION=1 \
+          -DBUILD_SVCLI=1 \
+          ..
+
+    - name: build
+      working-directory: build
+      env:
+        CC: ${{ matrix.compiler.CC }}
+        CXX: ${{ matrix.compiler.CXX }}
+      run: cmake --build .
+
+    - name: docs
+      working-directory: build
+      run: cmake --build . --target doc
+
+  build-macos:
+    strategy:
+      matrix:
+        build-type: ["Debug", "Release"]
+        build-shared: ["0", "1"]
+        compiler:
+        - { CC: "clang", CXX: "clang++" }
+        - { CC: "gcc", CXX: "g++" }
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - name: deps
+        run: |
+          brew install icu4c openssl
+
+      - name: configure
+        run: |
+          mkdir build && cd build
+          cmake \
+            -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl@1.1 \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
+            -DBUILD_SHARED_LIBS=$${{ matrix.build-shared }} \
+            -DBUILD_SVCLI=1 \
+            ..
+
+      - name: build
+        working-directory: build
+        env:
+          CC: ${{ matrix.compiler.CC }}
+          CXX: ${{ matrix.compiler.CXX }}
+        run: cmake --build .

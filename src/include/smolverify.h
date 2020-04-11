@@ -100,10 +100,10 @@ enum class certificate_revision : std::uint16_t {
  * what Authenticode uses.
  */
 enum class certificate_type : std::uint16_t {
-  CERT_TYPE_X509             = 0x0001, /**< An x509 certificate */
+  CERT_TYPE_X509 = 0x0001,             /**< An x509 certificate */
   CERT_TYPE_PKCS_SIGNED_DATA = 0x0002, /**< A PKCS#7 SignedData */
-  CERT_TYPE_RESERVED_1       = 0x0003, /**< Reserved by Windows. */
-  CERT_TYPE_PKCS1_SIGN       = 0x0009, /**< PKCS1_MODULE_SIGN fields */
+  CERT_TYPE_RESERVED_1 = 0x0003,       /**< Reserved by Windows. */
+  CERT_TYPE_PKCS1_SIGN = 0x0009,       /**< PKCS1_MODULE_SIGN fields */
 };
 
 /**
@@ -220,8 +220,8 @@ class SignedData {
  private:
   impl::Authenticode_SpcIndirectDataContent *get_indirect_data() const;
 
-  std::vector<std::uint8_t>                  cert_buf_;
-  PKCS7 *                                    p7_{nullptr};
+  std::vector<std::uint8_t> cert_buf_;
+  PKCS7 *p7_{nullptr};
   impl::Authenticode_SpcIndirectDataContent *indirect_data_{nullptr};
 };
 
@@ -267,8 +267,8 @@ class WinCert {
   std::optional<SignedData> as_signed_data() const;
 
  private:
-  certificate_revision      revision_;
-  certificate_type          type_;
+  certificate_revision revision_;
+  certificate_type type_;
   std::vector<std::uint8_t> cert_buf_;
 };
 

@@ -1,7 +1,5 @@
 BasedOnStyle: Google
 AlignAfterOpenBracket: Align
-AlignConsecutiveAssignments: true
-AlignConsecutiveDeclarations: true
 AlignEscapedNewlinesLeft: true
 AllowShortFunctionsOnASingleLine: false
 BinPackArguments: false
