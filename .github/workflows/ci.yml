@@ -94,7 +94,6 @@ jobs:
             -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl@1.1 \
             -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
             -DBUILD_SHARED_LIBS=$${{ matrix.build-shared }} \
-            -DBUILD_DOCUMENTATION=1 \
             -DBUILD_SVCLI=1 \
             ..
 
