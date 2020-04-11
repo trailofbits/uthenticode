@@ -76,7 +76,7 @@ jobs:
 
       - name: deps
         run: |
-          brew install openssl
+          brew install icu4c openssl
 
       - name: configure
         run: |
