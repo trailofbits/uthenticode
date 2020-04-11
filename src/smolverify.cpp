@@ -55,7 +55,7 @@ static inline __attribute__((always_inline)) std::string tohex(std::uint8_t *buf
   std::stringstream ss;
   ss << std::hex << std::setw(2) << std::setfill('0');
 
-  for (auto i = 0; i < len; ++i) {
+  for (std::size_t i = 0; i < len; ++i) {
     ss << static_cast<int>(buf[i]);
   }
 
@@ -102,6 +102,8 @@ static inline __attribute__((always_inline)) checksum_kind nid_to_checksum_kind(
 
 std::ostream &operator<<(std::ostream &os, checksum_kind kind) {
   switch (kind) {
+    default:
+      return os << static_cast<std::uint16_t>(kind);
     case checksum_kind::MD5:
       return os << "MD5";
     case checksum_kind::SHA1:
@@ -109,20 +111,18 @@ std::ostream &operator<<(std::ostream &os, checksum_kind kind) {
     case checksum_kind::SHA256:
       return os << "SHA256";
   }
-
-  return os << static_cast<std::uint16_t>(kind);
 }
 
 Certificate::Certificate(X509 *cert) {
-  auto subject   = impl::OpenSSL_ptr(X509_NAME_oneline(X509_get_subject_name(cert), nullptr, 0),
+  auto subject = impl::OpenSSL_ptr(X509_NAME_oneline(X509_get_subject_name(cert), nullptr, 0),
                                    impl::OpenSSL_free);
-  auto issuer    = impl::OpenSSL_ptr(X509_NAME_oneline(X509_get_issuer_name(cert), nullptr, 0),
+  auto issuer = impl::OpenSSL_ptr(X509_NAME_oneline(X509_get_issuer_name(cert), nullptr, 0),
                                   impl::OpenSSL_free);
   auto serial_bn = impl::BN_ptr(ASN1_INTEGER_to_BN(X509_get_serialNumber(cert), nullptr), BN_free);
   auto serial_number = impl::OpenSSL_ptr(BN_bn2hex(serial_bn.get()), impl::OpenSSL_free);
 
-  subject_       = std::string(subject.get());
-  issuer_        = std::string(issuer.get());
+  subject_ = std::string(subject.get());
+  issuer_ = std::string(issuer.get());
   serial_number_ = std::string(serial_number.get());
 }
 
@@ -214,7 +214,7 @@ bool SignedData::verify_signature() const {
   const auto *seq_blob_ptr = sequence->data;
 
   long length = 0;
-  int  tag = 0, tag_class = 0;
+  int tag = 0, tag_class = 0;
   ASN1_get_object(&seq_blob_ptr, &length, &tag, &tag_class, sequence->length);
   if (tag != V_ASN1_SEQUENCE) {
     return false;
@@ -240,7 +240,7 @@ bool SignedData::verify_signature() const {
 }
 
 Checksum SignedData::get_checksum() const {
-  auto nid    = OBJ_obj2nid(indirect_data_->messageDigest->digestAlgorithm->algorithm);
+  auto nid = OBJ_obj2nid(indirect_data_->messageDigest->digestAlgorithm->algorithm);
   auto digest = tohex(indirect_data_->messageDigest->digest->data,
                       indirect_data_->messageDigest->digest->length);
   return std::make_tuple(nid_to_checksum_kind(nid), digest);
@@ -259,9 +259,9 @@ std::vector<Certificate> SignedData::get_signers() const {
      * it gets exploded into some std::allocator scope that makes the private Certificate
      * constructor flip out (since it's only friends with SignedData).
      *
-     * Instead, we std::move and count on the default move constructor.
+     * Instead, push_back and hope for copy elision (or the default move constructor, maybe).
      */
-    signers.push_back(std::move(Certificate(sk_X509_value(signers_stack.get(), i))));
+    signers.push_back(Certificate(sk_X509_value(signers_stack.get(), i)));
   }
 
   return signers;
@@ -277,7 +277,7 @@ std::vector<Certificate> SignedData::get_certificates() const {
   for (auto i = 0; i < sk_X509_num(certs_stack_ptr); ++i) {
     /* Like above: ideally we'd use emplace_back, but C++ gets in the way.
      */
-    certs.push_back(std::move(Certificate(sk_X509_value(certs_stack_ptr, i))));
+    certs.push_back(Certificate(sk_X509_value(certs_stack_ptr, i)));
   }
 
   return certs;
@@ -305,7 +305,7 @@ impl::Authenticode_SpcIndirectDataContent *SignedData::get_indirect_data() const
   /* TODO: Could probably use a BIO here instead of the direct-from-buffer API.
    */
   const auto *indir_data_inc_ptr = contents->d.other->value.sequence->data;
-  auto *      indir_data         = impl::d2i_Authenticode_SpcIndirectDataContent(
+  auto *indir_data = impl::d2i_Authenticode_SpcIndirectDataContent(
       nullptr, &indir_data_inc_ptr, contents->d.other->value.sequence->length);
   if (indir_data == nullptr) {
     return nullptr;
@@ -353,7 +353,7 @@ std::vector<WinCert> read_certs(peparse::parsed_pe *pe) {
    * bCertificate (uint8_t[dwLength - 8]): the raw certificate data in this entry
    */
   std::vector<WinCert> certs;
-  size_t               offset = 0;
+  size_t offset = 0;
   while (offset < raw_cert_table.size()) {
     std::uint32_t length = *reinterpret_cast<std::uint32_t *>(raw_cert_table.data() + offset);
     offset += sizeof(length);
@@ -379,7 +379,7 @@ std::vector<WinCert> read_certs(peparse::parsed_pe *pe) {
 
 std::vector<Checksum> get_checksums(peparse::parsed_pe *pe) {
   std::vector<Checksum> checksums;
-  const auto &          certs = read_certs(pe);
+  const auto &certs = read_certs(pe);
   if (certs.empty()) {
     return checksums;
   }
@@ -418,15 +418,15 @@ std::string calculate_checksum(peparse::parsed_pe *pe, checksum_kind kind) {
   /* The certificate table directory entry offset is also in the optional header,
    * albeit at different offsets for PE32 and PE32+. See each of the cases below.
    */
-  auto                    cert_table_offset = pe->peHeader.dos.e_lfanew + 24;
-  auto                    size_of_headers   = 0;
+  std::size_t cert_table_offset = pe->peHeader.dos.e_lfanew + 24;
+  std::size_t size_of_headers = 0;
   peparse::data_directory security_dir;
   if (pe->peHeader.nt.OptionalMagic == peparse::NT_OPTIONAL_32_MAGIC) {
-    security_dir    = pe->peHeader.nt.OptionalHeader.DataDirectory[peparse::DIR_SECURITY];
+    security_dir = pe->peHeader.nt.OptionalHeader.DataDirectory[peparse::DIR_SECURITY];
     size_of_headers = pe->peHeader.nt.OptionalHeader.SizeOfHeaders;
     cert_table_offset += 128;
   } else if (pe->peHeader.nt.OptionalMagic == peparse::NT_OPTIONAL_64_MAGIC) {
-    security_dir    = pe->peHeader.nt.OptionalHeader64.DataDirectory[peparse::DIR_SECURITY];
+    security_dir = pe->peHeader.nt.OptionalHeader64.DataDirectory[peparse::DIR_SECURITY];
     size_of_headers = pe->peHeader.nt.OptionalHeader64.SizeOfHeaders;
     cert_table_offset += 144;
   } else {
@@ -469,11 +469,11 @@ std::string calculate_checksum(peparse::parsed_pe *pe, checksum_kind kind) {
    */
   impl::SectionList sections;
   peparse::IterSec(pe,
-                   [](void *                               cbd,
-                      const peparse::VA &                  secBase,
-                      const std::string &                  sectionName,
-                      const peparse::image_section_header &sec,
-                      const peparse::bounded_buffer *      b) -> int {
+                   [](void *cbd,
+                      __attribute__((unused)) const peparse::VA &secBase,
+                      __attribute__((unused)) const std::string &sectionName,
+                      __attribute__((unused)) const peparse::image_section_header &sec,
+                      const peparse::bounded_buffer *b) -> int {
                      auto &sections = *static_cast<impl::SectionList *>(cbd);
                      sections.emplace_back(b);
                      return 0;
@@ -510,8 +510,8 @@ std::string calculate_checksum(peparse::parsed_pe *pe, checksum_kind kind) {
    * the number of needed allocations.
    */
   std::array<std::uint8_t, EVP_MAX_MD_SIZE> md_buf;
-  const auto *                              md     = EVP_get_digestbynid(nid);
-  auto *                                    md_ctx = EVP_MD_CTX_new();
+  const auto *md = EVP_get_digestbynid(nid);
+  auto *md_ctx = EVP_MD_CTX_new();
 
   EVP_DigestInit(md_ctx, md);
   EVP_DigestUpdate(md_ctx, pe_bits.data(), pe_bits.size());
@@ -521,7 +521,7 @@ std::string calculate_checksum(peparse::parsed_pe *pe, checksum_kind kind) {
   return tohex(md_buf.data(), EVP_MD_size(md));
 }
 
-bool verify(peparse::parsed_pe *pe) {
+bool verify(__attribute__((unused)) peparse::parsed_pe *pe) {
   // A PE is verified if and only if:
   // 1. It has one or more Authenticode signatures
   // 2. All Authenticode signatures verify successfully
