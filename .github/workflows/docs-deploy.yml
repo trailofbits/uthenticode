@@ -28,7 +28,7 @@ jobs:
       - name: deploy
         uses: peaceiris/actions-gh-pages@v3.5.6
         with:
-          personal_token: $${{ secrets.DOC_DEPLOY_TOKEN }}
+          personal_token: $${{ secrets.PERSONAL_TOKEN }}
           publish_dir: ./build/doc/html
           publish_branch: master
           external_repository: woodruffw/smolverify-doc
