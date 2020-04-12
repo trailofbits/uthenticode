@@ -8,3 +8,4 @@ RECURSIVE              = YES
 EXTRACT_ALL            = YES
 USE_MDFILE_AS_MAINPAGE = README.md
 OUTPUT_DIRECTORY       = doc
+GENERATE_LATEX         = NO
