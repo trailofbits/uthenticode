@@ -26,9 +26,8 @@ jobs:
         working-directory: build
         run: cmake --build . --target doc
       - name: deploy
-        working-directory: build/doc
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: $${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./html
+          publish_dir: ./build/doc/html
           publish_branch: gh-pages
