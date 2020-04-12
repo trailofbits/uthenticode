@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - deploy-experiments
 
 jobs:
   docs:
