@@ -28,6 +28,8 @@ jobs:
       - name: deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: $${{ secrets.GITHUB_TOKEN }}
+          personal_token: $${{ secrets.DOC_DEPLOY_TOKEN }}
           publish_dir: ./build/doc/html
           publish_branch: gh-pages
+          external_repository: woodruffw/smolverify-doc
+          force_orphan: true
