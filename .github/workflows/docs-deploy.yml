@@ -30,6 +30,6 @@ jobs:
         with:
           personal_token: $${{ secrets.DOC_DEPLOY_TOKEN }}
           publish_dir: ./build/doc/html
-          publish_branch: gh-pages
+          publish_branch: master
           external_repository: woodruffw/smolverify-doc
           force_orphan: true
