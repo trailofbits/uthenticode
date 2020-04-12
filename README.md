@@ -1,7 +1,7 @@
 smolverify
 ==========
 
-![CI](https://github.com/woodruffw/smolverify/workflows/CI/badge.svg)
+[![Build Status](https://img.shields.io/github/workflow/status/woodruffw/smolverify/CI/master)](https://github.com/woodruffw/smolverify/actions?query=workflow%3ACI)
 
 A ˢᵐᵒˡ (small) cross-platform library for verifying
 [Authenticode](https://docs.microsoft.com/en-us/windows-hardware/drivers/install/authenticode)
