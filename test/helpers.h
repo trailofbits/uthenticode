@@ -42,6 +42,7 @@ class Auth32PlusTest : public ::testing::Test {
   }
 
   void TearDown() override {
+    peparse::DestructParsedPE(pe);
   }
 
   peparse::parsed_pe *pe{nullptr};
