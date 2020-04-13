@@ -1,10 +1,9 @@
-#include <cstdlib>
-
-#include "gtest/gtest.h"
-
 #include <parser-library/parse.h>
 #include <smolverify.h>
 
+#include <cstdlib>
+
+#include "gtest/gtest.h"
 #include "helpers.h"
 
 TEST(read_certs, handles_nullptr) {
