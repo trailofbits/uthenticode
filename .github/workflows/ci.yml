@@ -68,7 +68,7 @@ jobs:
 
     - name: tests
       working-directory: build
-      run: ./test/smolverify-test
+      run: ./test/smolverify_test
 
     - name: docs
       working-directory: build
@@ -112,4 +112,4 @@ jobs:
 
       - name: tests
         working-directory: build
-        run: ./test/smolverify-test
+        run: ./test/smolverify_test
