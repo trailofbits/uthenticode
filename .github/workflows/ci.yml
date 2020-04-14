@@ -130,12 +130,12 @@ jobs:
       run: |
         mkdir build
         cd build
-        cmake \
-          -G "Visual Studio 16 2019" \
-          -A ${{ matrix.build-arch }} \
-          -DBUILD_SHARED_LIBS=${{ matrix.build-shared }} \
-          -DBUILD_SVCLI=1 \
-          -DBUILD_TESTS=1 \
+        cmake `
+          -G "Visual Studio 16 2019" `
+          -A ${{ matrix.build-arch }} `
+          -DBUILD_SHARED_LIBS=${{ matrix.build-shared }} `
+          -DBUILD_SVCLI=1 `
+          -DBUILD_TESTS=1 `
           ..
 
     - name: build
