@@ -33,7 +33,7 @@ void OpenSSL_free(void *ptr) {
  * @param  factor the factor to round by
  * @return        the rounded number
  */
-static inline __attribute__((always_inline)) std::size_t round(std::size_t x, std::size_t factor) {
+static inline std::size_t round(std::size_t x, std::size_t factor) {
   auto rem = x % factor;
   if (rem == 0) {
     return x;
@@ -48,7 +48,7 @@ static inline __attribute__((always_inline)) std::size_t round(std::size_t x, st
  * @param  len the buffer's size
  * @return     the hex string
  */
-static inline __attribute__((always_inline)) std::string tohex(std::uint8_t *buf, std::size_t len) {
+static inline std::string tohex(std::uint8_t *buf, std::size_t len) {
   if (buf == nullptr) {
     return {};
   }
@@ -69,7 +69,7 @@ static inline __attribute__((always_inline)) std::string tohex(std::uint8_t *buf
  * @param  kind the checksum_kind to convert
  * @return      an integer representing the corresponding OpenSSL NID
  */
-static inline __attribute__((always_inline)) int checksum_type_to_nid(checksum_kind kind) {
+static inline int checksum_type_to_nid(checksum_kind kind) {
   switch (kind) {
     default:
       return NID_undef;
@@ -88,7 +88,7 @@ static inline __attribute__((always_inline)) int checksum_type_to_nid(checksum_k
  * @param  nid the NID to convert
  * @return     the corresponding checksum_kind
  */
-static inline __attribute__((always_inline)) checksum_kind nid_to_checksum_kind(int nid) {
+static inline checksum_kind nid_to_checksum_kind(int nid) {
   switch (nid) {
     default:
       return checksum_kind::UNKNOWN;
@@ -472,9 +472,9 @@ std::string calculate_checksum(peparse::parsed_pe *pe, checksum_kind kind) {
   peparse::IterSec(
       pe,
       [](void *cbd,
-         __attribute__((unused)) const peparse::VA &secBase,
-         __attribute__((unused)) const std::string &sectionName,
-         __attribute__((unused)) const peparse::image_section_header &sec,
+         [[maybe_unused]] const peparse::VA &secBase,
+         [[maybe_unused]] const std::string &sectionName,
+         [[maybe_unused]] const peparse::image_section_header &sec,
          const peparse::bounded_buffer *b) -> int {
         auto &sections = *static_cast<impl::SectionList *>(cbd);
         sections.emplace_back(b);
