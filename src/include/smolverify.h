@@ -1,17 +1,16 @@
 #pragma once
 
+#include <openssl/asn1.h>
+#include <openssl/asn1t.h>
+#include <openssl/crypto.h>
+#include <openssl/x509.h>
+#include <parser-library/parse.h>
+
 #include <cstdint>
 #include <exception>
 #include <memory>
 #include <optional>
 #include <vector>
-
-#include <openssl/asn1.h>
-#include <openssl/asn1t.h>
-#include <openssl/crypto.h>
-#include <openssl/x509.h>
-
-#include <parser-library/parse.h>
 
 /**
  * \file smolverify.h

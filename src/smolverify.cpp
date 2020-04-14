@@ -1,5 +1,9 @@
 #include "smolverify.h"
 
+#include <openssl/crypto.h>
+#include <openssl/err.h>
+#include <openssl/x509.h>
+
 #include <algorithm>
 #include <array>
 #include <cstring>
@@ -7,10 +11,6 @@
 #include <iostream>
 #include <memory>
 #include <sstream>
-
-#include <openssl/crypto.h>
-#include <openssl/err.h>
-#include <openssl/x509.h>
 
 namespace smolverify {
 namespace impl {
@@ -469,17 +469,18 @@ std::string calculate_checksum(peparse::parsed_pe *pe, checksum_kind kind) {
    * used within C callbacks unless they're captureless.
    */
   impl::SectionList sections;
-  peparse::IterSec(pe,
-                   [](void *cbd,
-                      __attribute__((unused)) const peparse::VA &secBase,
-                      __attribute__((unused)) const std::string &sectionName,
-                      __attribute__((unused)) const peparse::image_section_header &sec,
-                      const peparse::bounded_buffer *b) -> int {
-                     auto &sections = *static_cast<impl::SectionList *>(cbd);
-                     sections.emplace_back(b);
-                     return 0;
-                   },
-                   &sections);
+  peparse::IterSec(
+      pe,
+      [](void *cbd,
+         __attribute__((unused)) const peparse::VA &secBase,
+         __attribute__((unused)) const std::string &sectionName,
+         __attribute__((unused)) const peparse::image_section_header &sec,
+         const peparse::bounded_buffer *b) -> int {
+        auto &sections = *static_cast<impl::SectionList *>(cbd);
+        sections.emplace_back(b);
+        return 0;
+      },
+      &sections);
 
   /* Copy each section's data into pe_bits, in ascending order.
    */

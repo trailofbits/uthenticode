@@ -20,7 +20,7 @@ jobs:
       - name: deps
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang-format
+          sudo apt-get install -y clang-format-9
 
       - name: lint
         run: |
@@ -56,6 +56,7 @@ jobs:
           -DBUILD_SHARED_LIBS=$${{ matrix.build-shared }} \
           -DBUILD_DOCUMENTATION=1 \
           -DBUILD_SVCLI=1 \
+          -DBUILD_TESTS=1 \
           ..
 
     - name: build
@@ -64,6 +65,10 @@ jobs:
         CC: ${{ matrix.compiler.CC }}
         CXX: ${{ matrix.compiler.CXX }}
       run: cmake --build .
+
+    - name: tests
+      working-directory: build
+      run: ./test/smolverify_test
 
     - name: docs
       working-directory: build
@@ -95,6 +100,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
             -DBUILD_SHARED_LIBS=$${{ matrix.build-shared }} \
             -DBUILD_SVCLI=1 \
+            -DBUILD_TESTS=1 \
             ..
 
       - name: build
@@ -103,3 +109,7 @@ jobs:
           CC: ${{ matrix.compiler.CC }}
           CXX: ${{ matrix.compiler.CXX }}
         run: cmake --build .
+
+      - name: tests
+        working-directory: build
+        run: ./test/smolverify_test
