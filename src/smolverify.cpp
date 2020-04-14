@@ -128,7 +128,7 @@ Certificate::Certificate(X509 *cert) {
 }
 
 SignedData::SignedData(std::vector<std::uint8_t> cert_buf) : cert_buf_(cert_buf) {
-  auto *buf_ptr = BIO_new_mem_buf(cert_buf_.data(), cert_buf_.size());
+  auto *buf_ptr = BIO_new_mem_buf(cert_buf_.data(), static_cast<int>(cert_buf_.size()));
   if (buf_ptr == nullptr) {
     throw std::bad_alloc{};
   }
@@ -331,7 +331,7 @@ std::optional<SignedData> WinCert::as_signed_data() const {
 
   try {
     return SignedData(cert_buf_);
-  } catch (FormatError &e) {
+  } catch (FormatError) {
     return std::nullopt;
   }
 }
@@ -420,7 +420,7 @@ std::string calculate_checksum(peparse::parsed_pe *pe, checksum_kind kind) {
    * albeit at different offsets for PE32 and PE32+. See each of the cases below.
    */
   std::size_t cert_table_offset = pe->peHeader.dos.e_lfanew + 24;
-  std::size_t size_of_headers = 0;
+  std::uint32_t size_of_headers = 0;
   peparse::data_directory security_dir;
   if (pe->peHeader.nt.OptionalMagic == peparse::NT_OPTIONAL_32_MAGIC) {
     security_dir = pe->peHeader.nt.OptionalHeader.DataDirectory[peparse::DIR_SECURITY];
