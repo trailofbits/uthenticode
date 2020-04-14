@@ -126,6 +126,10 @@ jobs:
       with:
         submodules: true
 
+    - name: deps
+      run: |
+        choco install -y openssl
+
     - name: configure
       run: |
         mkdir build
