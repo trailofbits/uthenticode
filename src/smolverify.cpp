@@ -523,7 +523,7 @@ std::string calculate_checksum(peparse::parsed_pe *pe, checksum_kind kind) {
   return tohex(md_buf.data(), EVP_MD_size(md));
 }
 
-bool verify(__attribute__((unused)) peparse::parsed_pe *pe) {
+bool verify(peparse::parsed_pe *pe) {
   /* Our verification state.
    * A PE is said to be verified if all three are true.
    *
