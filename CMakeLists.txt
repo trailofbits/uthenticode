@@ -41,10 +41,10 @@ if(BUILD_DOCUMENTATION)
   )
 endif()
 
-# `format` target.
+# `smolverify_format` target.
 file(GLOB_RECURSE SMOLVERIFY_ALL_SOURCES test/*.cpp test/*.h src/*.cpp src/*.h)
 add_custom_target(
-  format
+  "${PROJECT_NAME}_format"
   COMMAND clang-format -i -style=file ${SMOLVERIFY_ALL_SOURCES}
   WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
   COMMENT "Auto-format the codebase with clang-format"
