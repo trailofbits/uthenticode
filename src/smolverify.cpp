@@ -14,25 +14,25 @@
 
 namespace smolverify {
 namespace impl {
-// clang-format off
+/* clang-format off */
 ASN1_SEQUENCE(Authenticode_SpcAttributeTypeAndOptionalValue) = {
   ASN1_SIMPLE(Authenticode_SpcAttributeTypeAndOptionalValue, type, ASN1_OBJECT),
   ASN1_OPT(Authenticode_SpcAttributeTypeAndOptionalValue, value, ASN1_ANY)
-} ASN1_SEQUENCE_END(Authenticode_SpcAttributeTypeAndOptionalValue)
-IMPLEMENT_ASN1_FUNCTIONS(Authenticode_SpcAttributeTypeAndOptionalValue)
+} ASN1_SEQUENCE_END(Authenticode_SpcAttributeTypeAndOptionalValue);
+IMPLEMENT_ASN1_FUNCTIONS(Authenticode_SpcAttributeTypeAndOptionalValue);
 
 ASN1_SEQUENCE(Authenticode_DigestInfo) = {
   ASN1_SIMPLE(Authenticode_DigestInfo, digestAlgorithm, X509_ALGOR),
   ASN1_SIMPLE(Authenticode_DigestInfo, digest, ASN1_OCTET_STRING)
-} ASN1_SEQUENCE_END(Authenticode_DigestInfo)
-IMPLEMENT_ASN1_FUNCTIONS(Authenticode_DigestInfo)
+} ASN1_SEQUENCE_END(Authenticode_DigestInfo);
+IMPLEMENT_ASN1_FUNCTIONS(Authenticode_DigestInfo);
 
 ASN1_SEQUENCE(Authenticode_SpcIndirectDataContent) = {
   ASN1_SIMPLE(Authenticode_SpcIndirectDataContent, data, Authenticode_SpcAttributeTypeAndOptionalValue),
   ASN1_SIMPLE(Authenticode_SpcIndirectDataContent, messageDigest, Authenticode_DigestInfo)
-} ASN1_SEQUENCE_END(Authenticode_SpcIndirectDataContent)
-IMPLEMENT_ASN1_FUNCTIONS(Authenticode_SpcIndirectDataContent)
-// clang-format on
+} ASN1_SEQUENCE_END(Authenticode_SpcIndirectDataContent);
+IMPLEMENT_ASN1_FUNCTIONS(Authenticode_SpcIndirectDataContent);
+/* clang-format on */
 
 /* OpenSSL defines OPENSSL_free as a macro, which we can't use with decltype.
  * So we wrap it here for use with unique_ptr.
