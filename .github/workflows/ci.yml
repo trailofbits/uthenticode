@@ -149,4 +149,4 @@ jobs:
 
     - name: tests
       working-directory: build
-      run: ./test/smolverify_test
+      run: ./test/${{ matrix.build-type }}/smolverify_test
