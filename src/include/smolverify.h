@@ -41,22 +41,8 @@ typedef struct {
 
 /* Custom ASN.1 insanity is quarantined to the impl namespace.
  */
-ASN1_SEQUENCE(Authenticode_SpcAttributeTypeAndOptionalValue) = {
-  ASN1_SIMPLE(Authenticode_SpcAttributeTypeAndOptionalValue, type, ASN1_OBJECT),
-  ASN1_OPT(Authenticode_SpcAttributeTypeAndOptionalValue, value, ASN1_ANY)
-} ASN1_SEQUENCE_END(Authenticode_SpcAttributeTypeAndOptionalValue)
 DECLARE_ASN1_FUNCTIONS(Authenticode_SpcAttributeTypeAndOptionalValue)
-
-ASN1_SEQUENCE(Authenticode_DigestInfo) = {
-  ASN1_SIMPLE(Authenticode_DigestInfo, digestAlgorithm, X509_ALGOR),
-  ASN1_SIMPLE(Authenticode_DigestInfo, digest, ASN1_OCTET_STRING)
-} ASN1_SEQUENCE_END(Authenticode_DigestInfo)
 DECLARE_ASN1_FUNCTIONS(Authenticode_DigestInfo)
-
-ASN1_SEQUENCE(Authenticode_SpcIndirectDataContent) = {
-  ASN1_SIMPLE(Authenticode_SpcIndirectDataContent, data, Authenticode_SpcAttributeTypeAndOptionalValue),
-  ASN1_SIMPLE(Authenticode_SpcIndirectDataContent, messageDigest, Authenticode_DigestInfo)
-} ASN1_SEQUENCE_END(Authenticode_SpcIndirectDataContent)
 DECLARE_ASN1_FUNCTIONS(Authenticode_SpcIndirectDataContent)
 
 /* OpenSSL defines OPENSSL_free as a macro, which we can't use with decltype.
