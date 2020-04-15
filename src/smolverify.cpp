@@ -14,8 +14,23 @@
 
 namespace smolverify {
 namespace impl {
+// clang-format off
+ASN1_SEQUENCE(Authenticode_SpcAttributeTypeAndOptionalValue) = {
+  ASN1_SIMPLE(Authenticode_SpcAttributeTypeAndOptionalValue, type, ASN1_OBJECT),
+  ASN1_OPT(Authenticode_SpcAttributeTypeAndOptionalValue, value, ASN1_ANY)
+} ASN1_SEQUENCE_END(Authenticode_SpcAttributeTypeAndOptionalValue)
 IMPLEMENT_ASN1_FUNCTIONS(Authenticode_SpcAttributeTypeAndOptionalValue)
+
+ASN1_SEQUENCE(Authenticode_DigestInfo) = {
+  ASN1_SIMPLE(Authenticode_DigestInfo, digestAlgorithm, X509_ALGOR),
+  ASN1_SIMPLE(Authenticode_DigestInfo, digest, ASN1_OCTET_STRING)
+} ASN1_SEQUENCE_END(Authenticode_DigestInfo)
 IMPLEMENT_ASN1_FUNCTIONS(Authenticode_DigestInfo)
+
+ASN1_SEQUENCE(Authenticode_SpcIndirectDataContent) = {
+  ASN1_SIMPLE(Authenticode_SpcIndirectDataContent, data, Authenticode_SpcAttributeTypeAndOptionalValue),
+  ASN1_SIMPLE(Authenticode_SpcIndirectDataContent, messageDigest, Authenticode_DigestInfo)
+} ASN1_SEQUENCE_END(Authenticode_SpcIndirectDataContent)
 IMPLEMENT_ASN1_FUNCTIONS(Authenticode_SpcIndirectDataContent)
 
 /* OpenSSL defines OPENSSL_free as a macro, which we can't use with decltype.
@@ -24,6 +39,7 @@ IMPLEMENT_ASN1_FUNCTIONS(Authenticode_SpcIndirectDataContent)
 void OpenSSL_free(void *ptr) {
   OPENSSL_free(ptr);
 }
+// clang-format on
 }  // namespace impl
 
 /**
@@ -33,7 +49,7 @@ void OpenSSL_free(void *ptr) {
  * @param  factor the factor to round by
  * @return        the rounded number
  */
-static inline __attribute__((always_inline)) std::size_t round(std::size_t x, std::size_t factor) {
+static inline std::size_t round(std::size_t x, std::size_t factor) {
   auto rem = x % factor;
   if (rem == 0) {
     return x;
@@ -48,7 +64,7 @@ static inline __attribute__((always_inline)) std::size_t round(std::size_t x, st
  * @param  len the buffer's size
  * @return     the hex string
  */
-static inline __attribute__((always_inline)) std::string tohex(std::uint8_t *buf, std::size_t len) {
+static inline std::string tohex(std::uint8_t *buf, std::size_t len) {
   if (buf == nullptr) {
     return {};
   }
@@ -69,7 +85,7 @@ static inline __attribute__((always_inline)) std::string tohex(std::uint8_t *buf
  * @param  kind the checksum_kind to convert
  * @return      an integer representing the corresponding OpenSSL NID
  */
-static inline __attribute__((always_inline)) int checksum_type_to_nid(checksum_kind kind) {
+static inline int checksum_type_to_nid(checksum_kind kind) {
   switch (kind) {
     default:
       return NID_undef;
@@ -88,7 +104,7 @@ static inline __attribute__((always_inline)) int checksum_type_to_nid(checksum_k
  * @param  nid the NID to convert
  * @return     the corresponding checksum_kind
  */
-static inline __attribute__((always_inline)) checksum_kind nid_to_checksum_kind(int nid) {
+static inline checksum_kind nid_to_checksum_kind(int nid) {
   switch (nid) {
     default:
       return checksum_kind::UNKNOWN;
@@ -128,7 +144,7 @@ Certificate::Certificate(X509 *cert) {
 }
 
 SignedData::SignedData(std::vector<std::uint8_t> cert_buf) : cert_buf_(cert_buf) {
-  auto *buf_ptr = BIO_new_mem_buf(cert_buf_.data(), cert_buf_.size());
+  auto *buf_ptr = BIO_new_mem_buf(cert_buf_.data(), static_cast<int>(cert_buf_.size()));
   if (buf_ptr == nullptr) {
     throw std::bad_alloc{};
   }
@@ -331,7 +347,7 @@ std::optional<SignedData> WinCert::as_signed_data() const {
 
   try {
     return SignedData(cert_buf_);
-  } catch (FormatError &e) {
+  } catch (FormatError) {
     return std::nullopt;
   }
 }
@@ -420,7 +436,7 @@ std::string calculate_checksum(peparse::parsed_pe *pe, checksum_kind kind) {
    * albeit at different offsets for PE32 and PE32+. See each of the cases below.
    */
   std::size_t cert_table_offset = pe->peHeader.dos.e_lfanew + 24;
-  std::size_t size_of_headers = 0;
+  std::uint32_t size_of_headers = 0;
   peparse::data_directory security_dir;
   if (pe->peHeader.nt.OptionalMagic == peparse::NT_OPTIONAL_32_MAGIC) {
     security_dir = pe->peHeader.nt.OptionalHeader.DataDirectory[peparse::DIR_SECURITY];
@@ -472,9 +488,9 @@ std::string calculate_checksum(peparse::parsed_pe *pe, checksum_kind kind) {
   peparse::IterSec(
       pe,
       [](void *cbd,
-         __attribute__((unused)) const peparse::VA &secBase,
-         __attribute__((unused)) const std::string &sectionName,
-         __attribute__((unused)) const peparse::image_section_header &sec,
+         [[maybe_unused]] const peparse::VA &secBase,
+         [[maybe_unused]] const std::string &sectionName,
+         [[maybe_unused]] const peparse::image_section_header &sec,
          const peparse::bounded_buffer *b) -> int {
         auto &sections = *static_cast<impl::SectionList *>(cbd);
         sections.emplace_back(b);
