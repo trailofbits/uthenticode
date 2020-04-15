@@ -23,7 +23,6 @@ namespace smolverify {
  * This namespace is intentionally undocumented.
  */
 namespace impl {
-// clang-format off
 typedef struct {
   ASN1_OBJECT *type;
   ASN1_TYPE *value;
@@ -61,8 +60,6 @@ using STACK_OF_X509_ptr = std::unique_ptr<STACK_OF(X509), decltype(&sk_X509_free
 using SectionList = std::vector<const peparse::bounded_buffer *>;
 
 constexpr auto SPC_INDIRECT_DATA_OID = "1.3.6.1.4.1.311.2.1.4";
-
-// clang-format on
 }  // namespace impl
 
 /**
