@@ -32,7 +32,6 @@ ASN1_SEQUENCE(Authenticode_SpcIndirectDataContent) = {
   ASN1_SIMPLE(Authenticode_SpcIndirectDataContent, messageDigest, Authenticode_DigestInfo)
 } ASN1_SEQUENCE_END(Authenticode_SpcIndirectDataContent)
 IMPLEMENT_ASN1_FUNCTIONS(Authenticode_SpcIndirectDataContent)
-// clang-format on
 
 /* OpenSSL defines OPENSSL_free as a macro, which we can't use with decltype.
  * So we wrap it here for use with unique_ptr.
@@ -40,6 +39,7 @@ IMPLEMENT_ASN1_FUNCTIONS(Authenticode_SpcIndirectDataContent)
 void OpenSSL_free(void *ptr) {
   OPENSSL_free(ptr);
 }
+// clang-format on
 }  // namespace impl
 
 /**
