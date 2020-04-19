@@ -129,6 +129,7 @@ jobs:
 
     - name: deps
       run: |
+        vcpkg integrate install
         vcpkg install openssl --triplet ${{ matrix.build-arch.triplet }}
 
     - name: configure
