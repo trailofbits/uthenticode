@@ -117,7 +117,9 @@ jobs:
   build-windows:
     strategy:
       matrix:
-        build-arch: ["x64", "Win32"]
+        build-arch:
+        - { arch: "x64", triplet: "x64-windows" }
+        - { arch: "Win32", triplet: "x86-windows" }
         build-type: ["Debug", "Release"]
     runs-on: windows-latest
     steps:
@@ -127,7 +129,7 @@ jobs:
 
     - name: deps
       run: |
-        vcpkg install openssl
+        vcpkg install openssl --triplet ${{ matrix.build-arch.triplet }}
 
     - name: configure
       run: |
@@ -135,7 +137,7 @@ jobs:
         cd build
         cmake `
           -G "Visual Studio 16 2019" `
-          -A ${{ matrix.build-arch }} `
+          -A ${{ matrix.build-arch.arch }} `
           -DBUILD_SVCLI=1 `
           -DBUILD_TESTS=1 `
           ..
