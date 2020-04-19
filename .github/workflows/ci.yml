@@ -117,7 +117,7 @@ jobs:
   build-windows:
     strategy:
       matrix:
-        build-arch: ["x64"]
+        build-arch: ["x64", "Win32"]
         build-type: ["Debug", "Release"]
     runs-on: windows-latest
     steps:
@@ -127,7 +127,7 @@ jobs:
 
     - name: deps
       run: |
-        choco install -y openssl
+        vcpkg install openssl
 
     - name: configure
       run: |
