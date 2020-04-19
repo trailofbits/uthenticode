@@ -138,7 +138,7 @@ jobs:
         cmake `
           -G "Visual Studio 16 2019" `
           -A ${{ matrix.build-arch.arch }} `
-          -DOPENSSL_ROOT_DIR=$ENV:VCPKG_INSTALLATION_ROOT/installed/${{ matrix.build-arch.triplet }} `
+          -DOPENSSL_ROOT_DIR=C:/vcpkg/installed/${{ matrix.build-arch.triplet }} `
           -DBUILD_SVCLI=1 `
           -DBUILD_TESTS=1 `
           ..
