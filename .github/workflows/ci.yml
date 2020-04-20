@@ -149,4 +149,6 @@ jobs:
 
     - name: tests
       working-directory: build
-      run: ./test/${{ matrix.build-type }}/smolverify_test.exe
+      run: |
+        Test-Path ./${{ matrix.build-type }}/smolverify_test.exe
+        ./test/${{ matrix.build-type }}/smolverify_test.exe
