@@ -118,8 +118,8 @@ jobs:
     strategy:
       matrix:
         build-arch:
-        - { arch: "x64", triplet: "x64-windows" }
-        - { arch: "Win32", triplet: "x86-windows" }
+        - { arch: "x64", triplet: "x64-windows-static" }
+        - { arch: "Win32", triplet: "x86-windows-static" }
         build-type: ["Debug", "Release"]
     runs-on: windows-latest
     steps:
@@ -138,6 +138,7 @@ jobs:
         cmake `
           -G "Visual Studio 16 2019" `
           -A ${{ matrix.build-arch.arch }} `
+          -DOPENSSL_USE_STATIC_LIBS=1 `
           -DOPENSSL_ROOT_DIR=C:/vcpkg/installed/${{ matrix.build-arch.triplet }} `
           -DBUILD_SVCLI=1 `
           -DBUILD_TESTS=1 `
