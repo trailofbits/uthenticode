@@ -54,6 +54,8 @@ $ cmake -DBUILD_DOCUMENTATION=1 ..
 $ make doc
 ```
 
+Similarly, you can build the (gtest-based) unit tests with `-DBUILD_TESTS=1`.
+
 ## Usage
 
 *smolverify*'s public API is documented in `smolverify.h` and in the Doxygen documentation
