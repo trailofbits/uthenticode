@@ -147,6 +147,12 @@ jobs:
       working-directory: build
       run: cmake --build . --config ${{ matrix.build-type }}
 
+    - name: Upload build
+      uses: actions/upload-artifact@v1
+      with:
+        name: ${{ matrix.build-arch.arch}}-${{ matrix.build-type }}-smolverify
+        path: build
+
     - name: tests
       working-directory: build
       run: |
