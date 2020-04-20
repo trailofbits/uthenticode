@@ -117,7 +117,9 @@ jobs:
   build-windows:
     strategy:
       matrix:
-        build-arch: ["x64"]
+        build-arch:
+        - { arch: "x64", triplet: "x64-windows" }
+        - { arch: "Win32", triplet: "x86-windows" }
         build-type: ["Debug", "Release"]
     runs-on: windows-latest
     steps:
@@ -127,7 +129,7 @@ jobs:
 
     - name: deps
       run: |
-        choco install -y openssl
+        vcpkg install openssl --triplet ${{ matrix.build-arch.triplet }}
 
     - name: configure
       run: |
@@ -135,18 +137,18 @@ jobs:
         cd build
         cmake `
           -G "Visual Studio 16 2019" `
-          -A ${{ matrix.build-arch }} `
+          -A ${{ matrix.build-arch.arch }} `
+          -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake `
           -DBUILD_SVCLI=1 `
           -DBUILD_TESTS=1 `
           ..
 
     - name: build
       working-directory: build
-      env:
-        CC: ${{ matrix.compiler.CC }}
-        CXX: ${{ matrix.compiler.CXX }}
       run: cmake --build . --config ${{ matrix.build-type }}
 
     - name: tests
       working-directory: build
-      run: ./test/${{ matrix.build-type }}/smolverify_test
+      run: |
+        Test-Path ./test/${{ matrix.build-type }}/smolverify_test.exe
+        ./test/${{ matrix.build-type }}/smolverify_test.exe
