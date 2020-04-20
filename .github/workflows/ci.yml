@@ -145,9 +145,6 @@ jobs:
 
     - name: build
       working-directory: build
-      env:
-        CC: ${{ matrix.compiler.CC }}
-        CXX: ${{ matrix.compiler.CXX }}
       run: cmake --build . --config ${{ matrix.build-type }}
 
     - name: tests
