@@ -149,5 +149,4 @@ jobs:
 
     - name: tests
       working-directory: build
-      shell: bash
-      run: ./test/${{ matrix.build-type }}/smolverify_test
+      run: ./test/${{ matrix.build-type }}/smolverify_test.exe
