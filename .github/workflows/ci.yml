@@ -26,7 +26,7 @@ jobs:
         run: |
           mkdir build && cd build
           cmake ..
-          cmake --build . --target smolverify_format
+          cmake --build . --target uthenticode_format
           cd .. && git diff --exit-code
 
   build-linux:
@@ -68,7 +68,7 @@ jobs:
 
     - name: tests
       working-directory: build
-      run: ./test/smolverify_test
+      run: ./test/uthenticode_test
 
     - name: docs
       working-directory: build
@@ -112,7 +112,7 @@ jobs:
 
       - name: tests
         working-directory: build
-        run: ./test/smolverify_test
+        run: ./test/uthenticode_test
 
   build-windows:
     strategy:
@@ -150,4 +150,4 @@ jobs:
     - name: tests
       working-directory: build
       run: |
-        ./test/${{ matrix.build-type }}/smolverify_test
+        ./test/${{ matrix.build-type }}/uthenticode_test

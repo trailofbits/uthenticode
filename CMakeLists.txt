@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 
-project(smolverify)
+project(uthenticode)
 set(CMAKE_CXX_STANDARD 17)
 
-file(READ "${PROJECT_SOURCE_DIR}/VERSION" SMOLVERIFY_VERSION)
-string(STRIP "${SMOLVERIFY_VERSION}" SMOLVERIFY_VERSION)
-add_compile_definitions(SMOLVERIFY_VERSION="${SMOLVERIFY_VERSION}")
+file(READ "${PROJECT_SOURCE_DIR}/VERSION" UTHENTICODE_VERSION)
+string(STRIP "${UTHENTICODE_VERSION}" UTHENTICODE_VERSION)
+add_compile_definitions(UTHENTICODE_VERSION="${UTHENTICODE_VERSION}")
 
 if(NOT PEPARSE_DIR)
   add_subdirectory("${PROJECT_SOURCE_DIR}/pe-parse")
@@ -20,7 +20,7 @@ if(BUILD_SVCLI)
 endif()
 
 find_package(Doxygen)
-option(BUILD_DOCUMENTATION "build HTML documentation for smolverify" ${DOXYGEN_FOUND})
+option(BUILD_DOCUMENTATION "build HTML documentation for uthenticode" ${DOXYGEN_FOUND})
 
 # `doc` target.
 if(BUILD_DOCUMENTATION)
@@ -41,11 +41,11 @@ if(BUILD_DOCUMENTATION)
   )
 endif()
 
-# `smolverify_format` target.
-file(GLOB_RECURSE SMOLVERIFY_ALL_SOURCES test/*.cpp test/*.h src/*.cpp src/*.h)
+# `uthenticode_format` target.
+file(GLOB_RECURSE UTHENTICODE_ALL_SOURCES test/*.cpp test/*.h src/*.cpp src/*.h)
 add_custom_target(
   "${PROJECT_NAME}_format"
-  COMMAND clang-format -i -style=file ${SMOLVERIFY_ALL_SOURCES}
+  COMMAND clang-format -i -style=file ${UTHENTICODE_ALL_SOURCES}
   WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
   COMMENT "Auto-format the codebase with clang-format"
   VERBATIM

@@ -1,5 +1,5 @@
 #include <parser-library/parse.h>
-#include <smolverify.h>
+#include <uthenticode.h>
 
 #include <cstdlib>
 
@@ -7,7 +7,7 @@
 #include "helpers.h"
 
 TEST_F(Auth32Test, Certificate_properties) {
-  auto certs = smolverify::read_certs(pe);
+  auto certs = uthenticode::read_certs(pe);
   auto signed_data = certs[0].as_signed_data();
 
   ASSERT_TRUE(signed_data.has_value());
@@ -21,7 +21,7 @@ TEST_F(Auth32Test, Certificate_properties) {
 }
 
 TEST_F(Auth32PlusTest, Certificate_properties) {
-  auto certs = smolverify::read_certs(pe);
+  auto certs = uthenticode::read_certs(pe);
   auto signed_data = certs[0].as_signed_data();
 
   ASSERT_TRUE(signed_data.has_value());

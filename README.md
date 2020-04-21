@@ -1,9 +1,9 @@
-smolverify
+uthenticode
 ==========
 
-[![Build Status](https://img.shields.io/github/workflow/status/trailofbits/smolverify/CI/master)](https://github.com/trailofbits/smolverify/actions?query=workflow%3ACI)
+[![Build Status](https://img.shields.io/github/workflow/status/trailofbits/uthenticode/CI/master)](https://github.com/trailofbits/uthenticode/actions?query=workflow%3ACI)
 
-A ˢᵐᵒˡ (small) cross-platform library for verifying
+*uthenticode* (stylized as *μthenticode*) is a small cross-platform library for verifying
 [Authenticode](https://docs.microsoft.com/en-us/windows-hardware/drivers/install/authenticode)
 digital signatures.
 
@@ -12,7 +12,7 @@ digital signatures.
 Authenticode is Microsoft's code signing technology, designed to allow signing
 and verification of programs.
 
-*smolverify* is a cross-platform reimplementation of the verification side of Authenticode.
+*uthenticode* is a cross-platform reimplementation of the verification side of Authenticode.
 It doesn't attempt to provide the signing side.
 
 ## Why?
@@ -30,15 +30,15 @@ timestamps, but is long-abandoned and CLI-focused.
 
 ## Beware!
 
-*smolverify* is **not** identical to the `Wintrust` API. Crucially, it **cannot** perform full-chain
+*uthenticode* is **not** identical to the `Wintrust` API. Crucially, it **cannot** perform full-chain
 verifications of Authenticode signatures, as it lacks access to the Trusted Publishers store.
 
-You should use *smolverify* to verify the embedded chain. You should **not** assume that a "verified"
-binary from *smolverify*'s perspective will run on an unmodified Windows system.
+You should use *uthenticode* to verify the embedded chain. You should **not** assume that a "verified"
+binary from *uthenticode*'s perspective will run on an unmodified Windows system.
 
 ## Building
 
-*smolverify* depends on [pe-parse](https://github.com/trailofbits/pe-parse) and OpenSSL 1.1.0.
+*uthenticode* depends on [pe-parse](https://github.com/trailofbits/pe-parse) and OpenSSL 1.1.0.
 
 ```bash
 $ mkdir build && cd build
@@ -46,7 +46,7 @@ $ cmake ..
 $ make
 ```
 
-If you have `doxygen` installed, you can build *smolverify*'s documentation
+If you have `doxygen` installed, you can build *uthenticode*'s documentation
 with `-DBUILD_DOCUMENTATION=1`:
 
 ```bash
@@ -58,10 +58,10 @@ Similarly, you can build the (gtest-based) unit tests with `-DBUILD_TESTS=1`.
 
 ## Usage
 
-*smolverify*'s public API is documented in `smolverify.h` and in the Doxygen documentation
+*uthenticode*'s public API is documented in `uthenticode.h` and in the Doxygen documentation
 (see above).
 
-The `svcli` utility also provides a small example of using *smolverify*'s APIs. You can build it
+The `svcli` utility also provides a small example of using *uthenticode*'s APIs. You can build it
 by passing `-DBUILD_SVCLI=1` to `cmake`:
 
 ```bash
@@ -72,7 +72,7 @@ $ ./src/svcli/svcli /path/to/some.exe
 
 ## Resources
 
-The following resources were essential to *smolverify*'s development:
+The following resources were essential to *uthenticode*'s development:
 
 * The [`osslsigncode`](https://sourceforge.net/projects/osslsigncode/) codebase
 * ClamAV's [Authenticode documentation](https://www.clamav.net/documents/microsoft-authenticode-signature-verification)

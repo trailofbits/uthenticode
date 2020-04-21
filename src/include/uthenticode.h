@@ -13,11 +13,11 @@
 #include <vector>
 
 /**
- * \file smolverify.h
+ * \file uthenticode.h
  *
- * The main smolverify namespace.
+ * The main uthenticode namespace.
  */
-namespace smolverify {
+namespace uthenticode {
 
 /**
  * This namespace is intentionally undocumented.
@@ -258,7 +258,7 @@ class WinCert {
  * Parses the certificates from the given `parsed_pe`.
  *
  * @param pe the `peparse::parsed_pe` to extract certificates from
- * @return a vector of smolverify::WinCert
+ * @return a vector of uthenticode::WinCert
  */
 std::vector<WinCert> read_certs(peparse::parsed_pe *pe);
 
@@ -282,7 +282,7 @@ std::string calculate_checksum(peparse::parsed_pe *pe, checksum_kind kind);
 /**
  * Verifies the given `parsed_pe`.
  *
- * A PE is said to be "verified" in the context of smolverify under the following
+ * A PE is said to be "verified" in the context of uthenticode under the following
  * conditions:
  *
  * 1. It has one or more valid SignedData entries
@@ -293,4 +293,4 @@ std::string calculate_checksum(peparse::parsed_pe *pe, checksum_kind kind);
  */
 bool verify(peparse::parsed_pe *pe);
 
-}  // namespace smolverify
+}  // namespace uthenticode
