@@ -3,7 +3,7 @@ uthenticode
 
 [![Build Status](https://img.shields.io/github/workflow/status/trailofbits/uthenticode/CI/master)](https://github.com/trailofbits/uthenticode/actions?query=workflow%3ACI)
 
-A ˢᵐᵒˡ (small) cross-platform library for verifying
+*uthenticode* (stylized as *μthenticode*) is a small cross-platform library for verifying
 [Authenticode](https://docs.microsoft.com/en-us/windows-hardware/drivers/install/authenticode)
 digital signatures.
 
