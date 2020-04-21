@@ -1,4 +1,4 @@
-#include "smolverify.h"
+#include "uthenticode.h"
 
 #include <openssl/crypto.h>
 #include <openssl/err.h>
@@ -12,7 +12,7 @@
 #include <memory>
 #include <sstream>
 
-namespace smolverify {
+namespace uthenticode {
 namespace impl {
 // clang-format off
 ASN1_SEQUENCE(Authenticode_SpcAttributeTypeAndOptionalValue) = {
@@ -567,4 +567,4 @@ bool verify(peparse::parsed_pe *pe) {
   return has_signed_data && verified_signed_data && verified_checksum;
 }
 
-}  // namespace smolverify
+}  // namespace uthenticode

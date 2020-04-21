@@ -1,18 +1,18 @@
 /**
  * \file svcli.cpp
  *
- * svcli: A small CLI demonstration of smolverify's API.
+ * svcli: A small CLI demonstration of uthenticode's API.
  *
  * Usage: `svcli <exe>`
  */
 
-#include <smolverify.h>
+#include <uthenticode.h>
 
 #include <array>
 #include <iomanip>
 #include <iostream>
 
-using checksum_kind = smolverify::checksum_kind;
+using checksum_kind = uthenticode::checksum_kind;
 
 int main(int argc, char const *argv[]) {
   if (argc != 2) {
@@ -25,9 +25,9 @@ int main(int argc, char const *argv[]) {
     return 1;
   }
 
-  std::cout << "This PE is " << (smolverify::verify(pe) ? "" : "NOT ") << "verified!\n\n";
+  std::cout << "This PE is " << (uthenticode::verify(pe) ? "" : "NOT ") << "verified!\n\n";
 
-  const auto &certs = smolverify::read_certs(pe);
+  const auto &certs = uthenticode::read_certs(pe);
 
   if (certs.empty()) {
     std::cerr << "PE has no certificate data!\n";
@@ -37,10 +37,10 @@ int main(int argc, char const *argv[]) {
   std::cout << argv[1] << " has " << certs.size() << " certificate entries\n\n";
 
   std::cout << "Calculated checksums:\n";
-  std::array<smolverify::checksum_kind, 3> kinds = {
+  std::array<uthenticode::checksum_kind, 3> kinds = {
       checksum_kind::MD5, checksum_kind::SHA1, checksum_kind::SHA256};
   for (const auto &kind : kinds) {
-    std::cout << std::setw(6) << kind << ": " << smolverify::calculate_checksum(pe, kind) << '\n';
+    std::cout << std::setw(6) << kind << ": " << uthenticode::calculate_checksum(pe, kind) << '\n';
   }
   std::cout << '\n';
 

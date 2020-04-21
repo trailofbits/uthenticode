@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 
-project(smolverify)
+project(uthenticode)
 
 find_package(OpenSSL 1.1 COMPONENTS Crypto REQUIRED)
 
-add_library("${PROJECT_NAME}" smolverify.cpp)
+add_library("${PROJECT_NAME}" uthenticode.cpp)
 
 if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
   target_compile_options("${PROJECT_NAME}" PUBLIC -Wall -Wextra -pedantic -Werror)
