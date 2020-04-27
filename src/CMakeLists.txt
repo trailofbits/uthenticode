@@ -14,5 +14,5 @@ endif()
 
 target_include_directories("${PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
-target_link_libraries("${PROJECT_NAME}" pe-parser-library)
+target_link_libraries("${PROJECT_NAME}" pe-parse::pe-parser-library)
 target_link_libraries("${PROJECT_NAME}" OpenSSL::Crypto)

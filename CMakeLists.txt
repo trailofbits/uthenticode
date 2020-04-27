@@ -7,11 +7,7 @@ file(READ "${PROJECT_SOURCE_DIR}/VERSION" UTHENTICODE_VERSION)
 string(STRIP "${UTHENTICODE_VERSION}" UTHENTICODE_VERSION)
 add_compile_definitions(UTHENTICODE_VERSION="${UTHENTICODE_VERSION}")
 
-if(NOT PEPARSE_DIR)
-  add_subdirectory("${PROJECT_SOURCE_DIR}/pe-parse")
-else()
-  add_subdirectory("${PEPARSE_DIR}" pe-parse)
-endif()
+find_package(pe-parse REQUIRED)
 
 add_subdirectory(src)
 
