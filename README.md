@@ -54,13 +54,14 @@ $ cmake ..
 $ cmake --build .
 ```
 
-If you have `doxygen` installed, you can build *uthenticode*'s documentation
-with `-DBUILD_DOCUMENTATION=1`:
+If you have `doxygen` installed, you can build *uthenticode*'s documentation with the top-level
+`Makefile`:
 
 ```bash
-$ cmake -DBUILD_DOCUMENTATION=1 ..
-$ cmake --build . --target doc
+$ make doc
 ```
+
+Pre-built (master) documentation is hosted [here](https://trailofbits.github.io/uthenticode/).
 
 Similarly, you can build the (gtest-based) unit tests with `-DBUILD_TESTS=1`.
 
