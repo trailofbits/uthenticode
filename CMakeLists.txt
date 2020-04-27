@@ -37,16 +37,6 @@ if(BUILD_DOCUMENTATION)
   )
 endif()
 
-# `uthenticode_format` target.
-file(GLOB_RECURSE UTHENTICODE_ALL_SOURCES test/*.cpp test/*.h src/*.cpp src/*.h)
-add_custom_target(
-  "${PROJECT_NAME}_format"
-  COMMAND clang-format -i -style=file ${UTHENTICODE_ALL_SOURCES}
-  WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
-  COMMENT "Auto-format the codebase with clang-format"
-  VERBATIM
-)
-
 # gtest setup.
 # Adapted roughly from the googletest README.
 if(BUILD_TESTS)

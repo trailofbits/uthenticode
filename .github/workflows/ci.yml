@@ -18,8 +18,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-        with:
-          submodules: true
 
       - name: deps
         run: |
@@ -27,11 +25,7 @@ jobs:
           sudo apt-get install -y clang-format-9
 
       - name: lint
-        run: |
-          mkdir build && cd build
-          cmake ..
-          cmake --build . --target uthenticode_format
-          cd .. && git diff --exit-code
+        run: make format
 
   build-linux:
     strategy:
@@ -44,8 +38,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-      with:
-        submodules: true
 
     - name: Restore from cache and install vcpkg
       uses: lukka/run-vcpkg@v2
@@ -96,8 +88,6 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
-        with:
-          submodules: true
 
       - name: Restore from cache and install vcpkg
         uses: lukka/run-vcpkg@v2
@@ -142,8 +132,6 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
-      with:
-        submodules: true
 
     - name: Restore from cache and install vcpkg
       uses: lukka/run-vcpkg@v2
