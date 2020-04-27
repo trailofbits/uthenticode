@@ -16,22 +16,16 @@ jobs:
       - name: deps
         run: |
           sudo apt-get update
-          sudo apt-get install -y doxygen graphviz libssl-dev
+          sudo apt-get install -y doxygen graphviz
 
-      - name: configure
-        run: |
-          mkdir build && cd build
-          cmake \
-            -DBUILD_DOCUMENTATION=1 \
-            ..
       - name: docs
         working-directory: build
-        run: cmake --build . --target doc
+        run: make doc
 
       - name: deploy
         uses: peaceiris/actions-gh-pages@v3.5.6
         with:
           personal_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build/doc/html
+          publish_dir: ./doc/html
           publish_branch: gh-pages
           force_orphan: true

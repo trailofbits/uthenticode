@@ -48,7 +48,7 @@ jobs:
     - name: deps
       run: |
         sudo apt-get update
-        sudo apt-get install -y doxygen graphviz libssl-dev
+        sudo apt-get install -y libssl-dev
 
     - name: configure
       run: |
@@ -57,7 +57,6 @@ jobs:
           -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
           -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
           -DBUILD_SHARED_LIBS=${{ matrix.build-shared }} \
-          -DBUILD_DOCUMENTATION=1 \
           -DBUILD_SVCLI=1 \
           -DBUILD_TESTS=1 \
           ..
@@ -72,10 +71,6 @@ jobs:
     - name: tests
       working-directory: build
       run: ./test/uthenticode_test
-
-    - name: docs
-      working-directory: build
-      run: cmake --build . --target doc
 
   build-macos:
     strategy:

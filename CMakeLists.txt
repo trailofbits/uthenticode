@@ -15,28 +15,6 @@ if(BUILD_SVCLI)
   add_subdirectory(src/svcli)
 endif()
 
-find_package(Doxygen)
-option(BUILD_DOCUMENTATION "build HTML documentation for uthenticode" ${DOXYGEN_FOUND})
-
-# `doc` target.
-if(BUILD_DOCUMENTATION)
-  if(NOT DOXYGEN_FOUND)
-    message(FATAL_ERROR "Doxygen is required")
-  endif()
-
-  set(doxyfile_in "${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in")
-  set(doxyfile "${CMAKE_CURRENT_BINARY_DIR}/Doxyfile")
-  configure_file("${doxyfile_in}" "${doxyfile}" @ONLY)
-
-  add_custom_target(
-    doc
-    COMMAND "${DOXYGEN_EXECUTABLE}" "${doxyfile}"
-    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-    COMMENT "Generate API documentation with Doxygen"
-    VERBATIM
-  )
-endif()
-
 # gtest setup.
 # Adapted roughly from the googletest README.
 if(BUILD_TESTS)
