@@ -40,10 +40,18 @@ binary from *uthenticode*'s perspective will run on an unmodified Windows system
 
 *uthenticode* depends on [pe-parse](https://github.com/trailofbits/pe-parse) and OpenSSL 1.1.0.
 
+pe-parse (and OpenSSL, if you don't already have it) can be installed via `vcpkg`:
+
+```bash
+$ vcpkg install pe-parse
+```
+
+The rest of the build is standard CMake:
+
 ```bash
 $ mkdir build && cd build
 $ cmake ..
-$ make
+$ cmake --build .
 ```
 
 If you have `doxygen` installed, you can build *uthenticode*'s documentation
@@ -51,7 +59,7 @@ with `-DBUILD_DOCUMENTATION=1`:
 
 ```bash
 $ cmake -DBUILD_DOCUMENTATION=1 ..
-$ make doc
+$ cmake --build . --target doc
 ```
 
 Similarly, you can build the (gtest-based) unit tests with `-DBUILD_TESTS=1`.
@@ -66,7 +74,7 @@ by passing `-DBUILD_SVCLI=1` to `cmake`:
 
 ```bash
 $ cmake -DBUILD_SVCLI=1 ..
-$ make
+$ cmake --build .
 $ ./src/svcli/svcli /path/to/some.exe
 ```
 
