@@ -72,10 +72,6 @@ jobs:
       working-directory: build
       run: ./test/uthenticode_test
 
-    - name: docs
-      working-directory: build
-      run: cmake --build . --target doc
-
   build-macos:
     strategy:
       matrix:
