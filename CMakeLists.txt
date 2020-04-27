@@ -7,11 +7,7 @@ file(READ "${PROJECT_SOURCE_DIR}/VERSION" UTHENTICODE_VERSION)
 string(STRIP "${UTHENTICODE_VERSION}" UTHENTICODE_VERSION)
 add_compile_definitions(UTHENTICODE_VERSION="${UTHENTICODE_VERSION}")
 
-if(NOT PEPARSE_DIR)
-  add_subdirectory("${PROJECT_SOURCE_DIR}/pe-parse")
-else()
-  add_subdirectory("${PEPARSE_DIR}" pe-parse)
-endif()
+find_package(pe-parse REQUIRED)
 
 add_subdirectory(src)
 
@@ -40,16 +36,6 @@ if(BUILD_DOCUMENTATION)
     VERBATIM
   )
 endif()
-
-# `uthenticode_format` target.
-file(GLOB_RECURSE UTHENTICODE_ALL_SOURCES test/*.cpp test/*.h src/*.cpp src/*.h)
-add_custom_target(
-  "${PROJECT_NAME}_format"
-  COMMAND clang-format -i -style=file ${UTHENTICODE_ALL_SOURCES}
-  WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
-  COMMENT "Auto-format the codebase with clang-format"
-  VERBATIM
-)
 
 # gtest setup.
 # Adapted roughly from the googletest README.

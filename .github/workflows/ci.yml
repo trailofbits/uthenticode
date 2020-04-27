@@ -9,13 +9,15 @@ on:
     # run CI every day even if no PRs/merges occur
     - cron:  '0 12 * * *'
 
+env:
+  vcpkg-commit: 422fb5df87f6ae2d01a6ccdca7211a54c0e88fa1
+  vcpkg-install: pe-parse
+
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-        with:
-          submodules: true
 
       - name: deps
         run: |
@@ -23,11 +25,7 @@ jobs:
           sudo apt-get install -y clang-format-9
 
       - name: lint
-        run: |
-          mkdir build && cd build
-          cmake ..
-          cmake --build . --target uthenticode_format
-          cd .. && git diff --exit-code
+        run: make format
 
   build-linux:
     strategy:
@@ -40,8 +38,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+
+    - name: Restore from cache and install vcpkg
+      uses: lukka/run-vcpkg@v2
       with:
-        submodules: true
+        vcpkgGitCommitId: ${{ env.vcpkg-commit }}
+        vcpkgArguments: ${{ env.vcpkg-install }}
 
     - name: deps
       run: |
@@ -52,6 +54,7 @@ jobs:
       run: |
         mkdir build && cd build
         cmake \
+          -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
           -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
           -DBUILD_SHARED_LIBS=${{ matrix.build-shared }} \
           -DBUILD_DOCUMENTATION=1 \
@@ -85,17 +88,22 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
+
+      - name: Restore from cache and install vcpkg
+        uses: lukka/run-vcpkg@v2
         with:
-          submodules: true
+          vcpkgGitCommitId: ${{ env.vcpkg-commit }}
+          vcpkgArguments: ${{ env.vcpkg-install }}
 
       - name: deps
         run: |
-          brew install icu4c openssl
+          brew install openssl
 
       - name: configure
         run: |
           mkdir build && cd build
           cmake \
+            -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
             -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl@1.1 \
             -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
             -DBUILD_SHARED_LIBS=${{ matrix.build-shared }} \
@@ -124,23 +132,25 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
-      with:
-        submodules: true
 
-    - name: deps
-      run: |
-        vcpkg install openssl --triplet ${{ matrix.build-arch.triplet }}
+    - name: Restore from cache and install vcpkg
+      uses: lukka/run-vcpkg@v2
+      with:
+        vcpkgGitCommitId: ${{ env.vcpkg-commit }}
+        vcpkgArguments: ${{ env.vcpkg-install }} openssl
+        vcpkgTriplet: ${{ matrix.build-arch.triplet }}
 
     - name: configure
+      shell: bash
       run: |
         mkdir build
         cd build
-        cmake `
-          -G "Visual Studio 16 2019" `
-          -A ${{ matrix.build-arch.arch }} `
-          -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake `
-          -DBUILD_SVCLI=1 `
-          -DBUILD_TESTS=1 `
+        cmake \
+          -G "Visual Studio 16 2019" \
+          -A ${{ matrix.build-arch.arch }} \
+          -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
+          -DBUILD_SVCLI=1 \
+          -DBUILD_TESTS=1 \
           ..
 
     - name: build
