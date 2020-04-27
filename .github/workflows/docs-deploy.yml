@@ -19,7 +19,6 @@ jobs:
           sudo apt-get install -y doxygen graphviz
 
       - name: docs
-        working-directory: build
         run: make doc
 
       - name: deploy
