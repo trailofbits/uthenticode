@@ -155,7 +155,7 @@ SignedData::SignedData(std::vector<std::uint8_t> cert_buf) : cert_buf_(cert_buf)
     throw FormatError{"Couldn't parse PKCS#7 SignedData"};
   }
 
-  /* NOTE: This call is safe within the constructor, since get_indirect_data
+  /* NOTE(ww): This call is safe within the constructor, since get_indirect_data
    * only requires p7_ to be initialized (which happens immediately above).
    */
   indirect_data_ = get_indirect_data();
@@ -187,7 +187,7 @@ bool SignedData::verify_signature() const {
       certs = p7_->d.sign->cert;
       break;
     }
-    /* NOTE: I'm pretty sure Authenticode signatures are always SignedData and never
+    /* NOTE(ww): I'm pretty sure Authenticode signatures are always SignedData and never
      * SignedAndEnvelopedData, but it doesn't hurt us to handle the latter as well.
      */
     case NID_pkcs7_signedAndEnveloped: {
@@ -200,44 +200,28 @@ bool SignedData::verify_signature() const {
     return false;
   }
 
-  /* Here's the annoying bit: the Authenticode format is *mostly* a normal PKCS#7 SignedData,
-   * except for the signature. The signature is stored as detached data under the signed
-   * contents, within a nested ASN.1 sequence.
-   *
-   * There's probably a better way to extract it, but it works.
-   *
-   * More details are documented here:
-   * https://www.cs.auckland.ac.nz/~pgut001/pubs/authenticode.txt
+  /* NOTE(ww): What happens below is a bit dumb: we convert our SpcIndirectDataContent back
+   * into DER form so that we can unwrap its ASN.1 sequence and pass the underlying data
+   * to PKCS7_verify for verification. This displays our intent a little more clearly than
+   * our previous approach, which was to walk the PKCS#7 structure manually.
    */
-  auto *other = p7_->d.sign->contents->d.other;
-  if (other == nullptr) {
+  std::uint8_t *indirect_data_buf = nullptr;
+  auto buf_size = impl::i2d_Authenticode_SpcIndirectDataContent(indirect_data_, &indirect_data_buf);
+  if (buf_size < 0 || indirect_data_buf == nullptr) {
     return false;
   }
+  auto indirect_data_ptr =
+      impl::OpenSSL_ptr(reinterpret_cast<char *>(indirect_data_buf), impl::OpenSSL_free);
 
-  /* We're expecting a sequence, with another sequence inside of it.
-   */
-  if (ASN1_TYPE_get(other) != V_ASN1_SEQUENCE) {
-    return false;
-  }
-
-  auto *sequence = other->value.sequence;
-  if (sequence == nullptr) {
-    return false;
-  }
-
-  /* We need to make our own copy of the data pointer, since ASN1_get_object
-   * increments the pointer passed to it.
-   */
-  const auto *seq_blob_ptr = sequence->data;
-
+  const auto *signed_data_seq = reinterpret_cast<std::uint8_t *>(indirect_data_ptr.get());
   long length = 0;
   int tag = 0, tag_class = 0;
-  ASN1_get_object(&seq_blob_ptr, &length, &tag, &tag_class, sequence->length);
+  ASN1_get_object(&signed_data_seq, &length, &tag, &tag_class, buf_size);
   if (tag != V_ASN1_SEQUENCE) {
     return false;
   }
 
-  auto *signed_data_ptr = BIO_new_mem_buf(seq_blob_ptr, length);
+  auto *signed_data_ptr = BIO_new_mem_buf(signed_data_seq, length);
   if (signed_data_ptr == nullptr) {
     return false;
   }
@@ -481,7 +465,7 @@ std::string calculate_checksum(peparse::parsed_pe *pe, checksum_kind kind) {
   /* Build up the list of sections in the PE, in ascending order by PointerToRawData
    * (i.e., by file offset).
    *
-   * NOTE: Ideally we'd use a capture with the C++ lambda here, but C++ lambdas can't be
+   * NOTE(ww): Ideally we'd use a capture with the C++ lambda here, but C++ lambdas can't be
    * used within C callbacks unless they're captureless.
    */
   impl::SectionList sections;
@@ -522,7 +506,7 @@ std::string calculate_checksum(peparse::parsed_pe *pe, checksum_kind kind) {
 
   /* Finally, hash the damn thing.
    *
-   * NOTE: Instead of building up pe_bits and hashing it in one pass, we
+   * NOTE(ww): Instead of building up pe_bits and hashing it in one pass, we
    * could hash it incrementally with each section. This would also solve
    * the capture problem with the C++ callback above and would reduce
    * the number of needed allocations.
