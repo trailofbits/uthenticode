@@ -77,6 +77,12 @@ jobs:
       working-directory: build
       run: ./test/uthenticode_test
 
+    - name: archive
+      if: |
+        github.event_name == 'release' && matrix.build-type == 'Release' && matrix.compiler.CC == 'clang'
+      run:
+        zip -r build.zip build
+
     - name: publish
       if: |
         github.event_name == 'release' && matrix.build-type == 'Release' && matrix.compiler.CC == 'clang'
@@ -86,7 +92,7 @@ jobs:
       with:
         upload_url: |
           https://uploads.github.com/repos/trailofbits/uthenticode/releases/${{ github.ref }}/assets
-        asset_path: build
+        asset_path: build.zip
         asset_name: ubuntu.${{ matrix.build-shared.repr }}.zip
         asset_content_type: application/zip
 
