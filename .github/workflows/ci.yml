@@ -1,6 +1,9 @@
 name: CI
 
 on:
+  release:
+    types:
+      - published
   push:
     branches:
       - master
@@ -71,6 +74,18 @@ jobs:
     - name: tests
       working-directory: build
       run: ./test/uthenticode_test
+
+    - name: publish
+      if: github.event_name == 'release' && matrix.build-type == 'Release'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: |
+          https://uploads.github.com/repos/trailofbits/uthenticode/releases/${{ github.ref }}/assets
+        asset_path: build
+        asset_name: ubuntu.zip
+        asset_content_type: application/zip
 
   build-macos:
     strategy:
