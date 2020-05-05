@@ -1,6 +1,9 @@
 name: CI
 
 on:
+  release:
+    types:
+      - published
   push:
     branches:
       - master
@@ -31,7 +34,9 @@ jobs:
     strategy:
       matrix:
         build-type: ["Debug", "Release"]
-        build-shared: ["0", "1"]
+        build-shared:
+         - { flag: "1", repr: "shared" }
+         - { flag: "0", repr: "static" }
         compiler:
         - { CC: "clang", CXX: "clang++" }
         - { CC: "gcc", CXX: "g++" }
@@ -56,7 +61,7 @@ jobs:
         cmake \
           -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
           -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
-          -DBUILD_SHARED_LIBS=${{ matrix.build-shared }} \
+          -DBUILD_SHARED_LIBS=${{ matrix.build-shared.flag }} \
           -DBUILD_SVCLI=1 \
           -DBUILD_TESTS=1 \
           ..
@@ -71,6 +76,19 @@ jobs:
     - name: tests
       working-directory: build
       run: ./test/uthenticode_test
+
+    - name: publish
+      if: |
+        github.event_name == 'release' && matrix.build-type == 'Release' && matrix.compiler.CC == 'clang'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: |
+          https://uploads.github.com/repos/trailofbits/uthenticode/releases/${{ github.ref }}/assets
+        asset_path: build
+        asset_name: ubuntu.${{ matrix.build-shared.repr }}.zip
+        asset_content_type: application/zip
 
   build-macos:
     strategy:
