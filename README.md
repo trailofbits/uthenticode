@@ -52,6 +52,9 @@ The rest of the build is standard CMake:
 $ mkdir build && cd build
 $ cmake ..
 $ cmake --build .
+# the default install prefix is the build directory;
+# use CMAKE_INSTALL_PREFIX to modify it
+$ cmake --build . --target install
 ```
 
 If you have `doxygen` installed, you can build *uthenticode*'s documentation with the top-level
@@ -63,7 +66,7 @@ $ make doc
 
 Pre-built (master) documentation is hosted [here](https://trailofbits.github.io/uthenticode/).
 
-Similarly, you can build the (gtest-based) unit tests with `-DBUILD_TESTS=1`.
+You can build the (gtest-based) unit tests with `-DBUILD_TESTS=1`.
 
 ## Usage
 
