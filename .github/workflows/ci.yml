@@ -76,7 +76,8 @@ jobs:
       run: ./test/uthenticode_test
 
     - name: publish
-      if: github.event_name == 'release' && matrix.build-type == 'Release'
+      if: |
+        github.event_name == 'release' && matrix.build-type == 'Release' && matrix.build-shared == '0' && matrix.compiler.CC == 'clang'
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
