@@ -1,6 +1,14 @@
 cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 
 project(uthenticode)
+
+# NOTE(ww): CMake has bad defaults for install prefixes.
+# Instead of fussing over them, install everything to the build directory by default
+# and let the user set CMAKE_INSTALL_PREFIX explicitly for their own needs.
+if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}" CACHE PATH "Default install directory" FORCE)
+endif ()
+
 set(CMAKE_CXX_STANDARD 17)
 
 file(READ "${PROJECT_SOURCE_DIR}/VERSION" UTHENTICODE_VERSION)
