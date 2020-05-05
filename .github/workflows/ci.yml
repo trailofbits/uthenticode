@@ -3,7 +3,7 @@ name: CI
 on:
   release:
     types:
-      - created
+      - published
   push:
     branches:
       - master
@@ -79,19 +79,18 @@ jobs:
 
     - name: archive
       if: |
-        github.event_name == 'release' && matrix.build-type == 'Release' && matrix.compiler.CC == 'clang'
+        github.event.release && matrix.build-type == 'Release' && matrix.compiler.CC == 'clang'
       run:
         zip -r build.zip build
 
     - name: publish
       if: |
-        github.event_name == 'release' && matrix.build-type == 'Release' && matrix.compiler.CC == 'clang'
+        github.event.release && matrix.build-type == 'Release' && matrix.compiler.CC == 'clang'
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: |
-          https://uploads.github.com/repos/trailofbits/uthenticode/releases/${{ github.ref }}/assets
+        upload_url: ${{ github.event.release.upload_url }}
         asset_path: build.zip
         asset_name: ubuntu.${{ matrix.build-shared.repr }}.zip
         asset_content_type: application/zip
