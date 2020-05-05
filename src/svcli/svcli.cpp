@@ -37,7 +37,7 @@ int main(int argc, char const *argv[]) {
   std::cout << argv[1] << " has " << certs.size() << " certificate entries\n\n";
 
   std::cout << "Calculated checksums:\n";
-  std::array<uthenticode::checksum_kind, 3> kinds = {
+  std::array<checksum_kind, 3> kinds = {
       checksum_kind::MD5, checksum_kind::SHA1, checksum_kind::SHA256};
   for (const auto &kind : kinds) {
     std::cout << std::setw(6) << kind << ": " << uthenticode::calculate_checksum(pe, kind) << '\n';
