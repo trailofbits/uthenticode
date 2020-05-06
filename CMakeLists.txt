@@ -7,7 +7,11 @@ project(uthenticode)
 # and let the user set CMAKE_INSTALL_PREFIX explicitly for their own needs.
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}" CACHE PATH "Default install directory" FORCE)
-endif ()
+endif()
+
+if (MSVC)
+  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+endif()
 
 set(CMAKE_CXX_STANDARD 17)
 
