@@ -6,10 +6,14 @@ find_package(OpenSSL 1.1 COMPONENTS Crypto REQUIRED)
 
 add_library("${PROJECT_NAME}" uthenticode.cpp)
 
-if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-  target_compile_options("${PROJECT_NAME}" PUBLIC -Wall -Wextra -pedantic -Werror)
-  target_compile_options("${PROJECT_NAME}" PUBLIC -fsanitize=address)
-  target_link_options("${PROJECT_NAME}" PUBLIC -fsanitize=address)
+if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug" OR "${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
+  if(MSVC)
+    target_compile_options("${PROJECT_NAME}" PUBLIC /W4 /WX)
+  else()
+    target_compile_options("${PROJECT_NAME}" PUBLIC -Wall -Wextra -pedantic -Werror)
+    target_compile_options("${PROJECT_NAME}" PUBLIC -fsanitize=address)
+    target_link_options("${PROJECT_NAME}" PUBLIC -fsanitize=address)
+  endif()
 endif()
 
 target_include_directories(
