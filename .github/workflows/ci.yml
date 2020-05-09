@@ -114,18 +114,13 @@ jobs:
         uses: lukka/run-vcpkg@v2
         with:
           vcpkgGitCommitId: ${{ env.vcpkg-commit }}
-          vcpkgArguments: ${{ env.vcpkg-install }}
-
-      - name: deps
-        run: |
-          brew install openssl
+          vcpkgArguments: ${{ env.vcpkg-install }} openssl
 
       - name: configure
         run: |
           mkdir build && cd build
           cmake \
             -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
-            -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl@1.1 \
             -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
             -DBUILD_SHARED_LIBS=${{ matrix.build-shared.flag }} \
             -DBUILD_SVCLI=1 \

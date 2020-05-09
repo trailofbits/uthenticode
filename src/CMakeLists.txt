@@ -12,11 +12,11 @@ add_library("${PROJECT_NAME}" uthenticode.cpp)
 
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug" OR "${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
   if (MSVC)
-    target_compile_options("${PROJECT_NAME}" PUBLIC /W4 /WX)
+    target_compile_options("${PROJECT_NAME}" INTERFACE /W4 /WX)
   else ()
-    target_compile_options("${PROJECT_NAME}" PUBLIC -Wall -Wextra -pedantic -Werror)
-    target_compile_options("${PROJECT_NAME}" PUBLIC -fsanitize=address)
-    target_link_options("${PROJECT_NAME}" PUBLIC -fsanitize=address)
+    target_compile_options("${PROJECT_NAME}" INTERFACE -Wall -Wextra -pedantic -Werror)
+    target_compile_options("${PROJECT_NAME}" INTERFACE -fsanitize=address)
+    target_link_libraries("${PROJECT_NAME}" INTERFACE -fsanitize=address)
   endif ()
 endif ()
 
@@ -29,8 +29,8 @@ target_include_directories(
 # even when set explicitly as PUBLIC. We set it here so that it works correctly in the install step.
 set_target_properties("${PROJECT_NAME}" PROPERTIES PUBLIC_HEADER "include/uthenticode.h")
 
-target_link_libraries("${PROJECT_NAME}" pe-parse::pe-parser-library)
-target_link_libraries("${PROJECT_NAME}" OpenSSL::Crypto)
+target_link_libraries("${PROJECT_NAME}" PUBLIC pe-parse::pe-parser-library)
+target_link_libraries("${PROJECT_NAME}" PRIVATE "${OPENSSL_CRYPTO_LIBRARY}")
 
 install(
   TARGETS "${PROJECT_NAME}"
