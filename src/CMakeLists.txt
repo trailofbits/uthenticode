@@ -17,6 +17,7 @@ if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug" OR "${CMAKE_BUILD_TYPE}" STREQUAL "Re
     target_compile_options("${PROJECT_NAME}" PUBLIC -Wall -Wextra -pedantic -Werror)
     target_compile_options("${PROJECT_NAME}" PUBLIC -fsanitize=address)
     target_link_options("${PROJECT_NAME}" PUBLIC -fsanitize=address)
+    set_target_properties("${PROJECT_NAME}" PROPERTIES LINK_FLAGS -fsanitize=address)
   endif ()
 endif ()
 
