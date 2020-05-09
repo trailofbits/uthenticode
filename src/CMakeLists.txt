@@ -29,8 +29,8 @@ target_include_directories(
 # even when set explicitly as PUBLIC. We set it here so that it works correctly in the install step.
 set_target_properties("${PROJECT_NAME}" PROPERTIES PUBLIC_HEADER "include/uthenticode.h")
 
-target_link_libraries("${PROJECT_NAME}" pe-parse::pe-parser-library)
-target_link_libraries("${PROJECT_NAME}" OpenSSL::Crypto)
+target_link_libraries("${PROJECT_NAME}" PUBLIC pe-parse::pe-parser-library)
+target_link_libraries("${PROJECT_NAME}" PRIVATE OpenSSL::Crypto)
 
 install(
   TARGETS "${PROJECT_NAME}"
