@@ -30,7 +30,7 @@ target_include_directories(
 set_target_properties("${PROJECT_NAME}" PROPERTIES PUBLIC_HEADER "include/uthenticode.h")
 
 target_link_libraries("${PROJECT_NAME}" PUBLIC pe-parse::pe-parser-library)
-target_link_libraries("${PROJECT_NAME}" PRIVATE OpenSSL::Crypto)
+target_link_libraries("${PROJECT_NAME}" PRIVATE "${OPENSSL_CRYPTO_LIBRARY}")
 
 install(
   TARGETS "${PROJECT_NAME}"
