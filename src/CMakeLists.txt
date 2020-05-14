@@ -32,6 +32,13 @@ set_target_properties("${PROJECT_NAME}" PROPERTIES PUBLIC_HEADER "include/uthent
 target_link_libraries("${PROJECT_NAME}" PUBLIC pe-parse::pe-parser-library)
 target_link_libraries("${PROJECT_NAME}" PRIVATE "${OPENSSL_CRYPTO_LIBRARY}")
 
+# NOTE(ww): More CMake dumbness: linking to OpenSSL statically above apparently doesn't
+# transitively link pthread or libdl correctly. We fix them up here.
+if (NOT MSVC)
+  find_package(Threads REQUIRED)
+  target_link_libraries("${PROJECT_NAME}" PRIVATE ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_DL_LIBS})
+endif ()
+
 install(
   TARGETS "${PROJECT_NAME}"
   EXPORT uthenticode-config
