@@ -35,6 +35,10 @@ target_link_libraries("${PROJECT_NAME}" PRIVATE "${OPENSSL_CRYPTO_LIBRARY}")
 # NOTE(ww): More CMake dumbness: linking to OpenSSL statically above apparently doesn't
 # transitively link pthread or libdl correctly. We fix them up here.
 if (NOT MSVC)
+  if(COMMAND cmake_policy)
+    cmake_policy(SET CMP0003 NEW)
+  endif(COMMAND cmake_policy)
+
   find_package(Threads REQUIRED)
   target_link_libraries("${PROJECT_NAME}" PRIVATE ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_DL_LIBS})
 endif ()
