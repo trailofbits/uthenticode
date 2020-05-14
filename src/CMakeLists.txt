@@ -2,11 +2,6 @@ cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 
 project(uthenticode)
 
-# CMP0003 enforces less insane linker-path searching behavior.
-if(COMMAND cmake_policy)
-  cmake_policy(SET CMP0003 NEW)
-endif(COMMAND cmake_policy)
-
 find_package(
   OpenSSL 1.1
   COMPONENTS Crypto
