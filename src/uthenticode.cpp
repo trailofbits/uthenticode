@@ -100,7 +100,7 @@ static inline int checksum_type_to_nid(checksum_kind kind) {
 
 /**
  * Convert the given OpenSSL NID to a checksum_kind.
-
+ *
  * @param  nid the NID to convert
  * @return     the corresponding checksum_kind
  */
@@ -298,17 +298,17 @@ std::optional<SignedData> SignedData::get_nested_signed_data() const {
   }
   impl::ASN1_OBJECT_ptr spc_nested_sig_oid(spc_nested_sig_oid_ptr, ASN1_OBJECT_free);
 
-  auto *nested_signed_data_ptr =
+  auto *nested_signed_data =
       PKCS7_get_attribute(signer_info, OBJ_obj2nid(spc_nested_sig_oid.get()));
-  if (nested_signed_data_ptr == nullptr) {
+  if (nested_signed_data == nullptr) {
     return std::nullopt;
   }
 
-  if (ASN1_TYPE_get(nested_signed_data_ptr) != V_ASN1_SEQUENCE) {
+  if (ASN1_TYPE_get(nested_signed_data) != V_ASN1_SEQUENCE) {
     return std::nullopt;
   }
 
-  auto *nested_signed_data_seq = nested_signed_data_ptr->value.sequence;
+  auto *nested_signed_data_seq = nested_signed_data->value.sequence;
   std::vector<std::uint8_t> cert_buf(nested_signed_data_seq->data,
                                      nested_signed_data_seq->data + nested_signed_data_seq->length);
 
