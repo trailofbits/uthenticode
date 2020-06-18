@@ -284,6 +284,37 @@ std::vector<Certificate> SignedData::get_certificates() const {
   return certs;
 }
 
+std::optional<SignedData> SignedData::get_nested_signed_data() const {
+  PKCS7_SIGNER_INFO *signer_info = sk_PKCS7_SIGNER_INFO_value(p7_->d.sign->signer_info, 0);
+
+  /* NOTE(ww): OpenSSL stupidity: you actually need to call OBJ_create before
+   * OBJ_txt2obj; the latter won't do it for you. Luckily (?) OpenSSL 1.1.0+
+   * auto-frees these, so they're not totally impossible to use in leakless C++.
+   */
+  OBJ_create(impl::SPC_NESTED_SIGNATURE_OID, NULL, NULL);
+  auto *spc_nested_sig_oid_ptr = OBJ_txt2obj(impl::SPC_NESTED_SIGNATURE_OID, 1);
+  if (spc_nested_sig_oid_ptr == nullptr) {
+    return std::nullopt;
+  }
+  impl::ASN1_OBJECT_ptr spc_nested_sig_oid(spc_nested_sig_oid_ptr, ASN1_OBJECT_free);
+
+  auto *nested_signed_data_ptr =
+      PKCS7_get_attribute(signer_info, OBJ_obj2nid(spc_nested_sig_oid.get()));
+  if (nested_signed_data_ptr == nullptr) {
+    return std::nullopt;
+  }
+
+  if (ASN1_TYPE_get(nested_signed_data_ptr) != V_ASN1_SEQUENCE) {
+    return std::nullopt;
+  }
+
+  auto *nested_signed_data_seq = nested_signed_data_ptr->value.sequence;
+  std::vector<std::uint8_t> cert_buf(nested_signed_data_seq->data,
+                                     nested_signed_data_seq->data + nested_signed_data_seq->length);
+
+  return std::make_optional<SignedData>(cert_buf);
+}
+
 impl::Authenticode_SpcIndirectDataContent *SignedData::get_indirect_data() const {
   auto *contents = p7_->d.sign->contents;
   if (contents == nullptr) {
@@ -292,6 +323,7 @@ impl::Authenticode_SpcIndirectDataContent *SignedData::get_indirect_data() const
 
   /* We're expecting a sequence whose type is SPC_INDIRECT_DATA_OID.
    */
+  OBJ_create(impl::SPC_INDIRECT_DATA_OID, NULL, NULL);
   auto *spc_indir_oid_ptr = OBJ_txt2obj(impl::SPC_INDIRECT_DATA_OID, 1);
   if (spc_indir_oid_ptr == nullptr) {
     return nullptr;
@@ -330,7 +362,7 @@ std::optional<SignedData> WinCert::as_signed_data() const {
   }
 
   try {
-    return SignedData(cert_buf_);
+    return std::make_optional<SignedData>(cert_buf_);
   } catch (FormatError) {
     return std::nullopt;
   }
