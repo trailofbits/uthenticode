@@ -73,6 +73,34 @@ int main(int argc, char const *argv[]) {
 
     std::cout << "\tThis SignedData is " << (signed_data->verify_signature() ? "valid" : "invalid")
               << "!\n";
+
+    const auto nested_signed_data = signed_data->get_nested_signed_data();
+    if (!nested_signed_data) {
+      continue;
+    }
+
+    std::cout << "\nNested SignedData entry:\n"
+              << "\tEmbedded checksum: "
+              << std::get<std::string>(nested_signed_data->get_checksum()) << "\n\n";
+
+    std::cout << "\tSigners:\n";
+    for (const auto &signer : nested_signed_data->get_signers()) {
+      std::cout << "\t\tSubject: " << signer.get_subject() << '\n'
+                << "\t\tIssuer: " << signer.get_issuer() << '\n'
+                << "\t\tSerial: " << signer.get_serial_number() << '\n'
+                << '\n';
+    }
+
+    std::cout << "\tCertificates:\n";
+    for (const auto &cert : nested_signed_data->get_certificates()) {
+      std::cout << "\t\tSubject: " << cert.get_subject() << '\n'
+                << "\t\tIssuer: " << cert.get_issuer() << '\n'
+                << "\t\tSerial: " << cert.get_serial_number() << '\n'
+                << '\n';
+    }
+
+    std::cout << "\tThis SignedData is "
+              << (nested_signed_data->verify_signature() ? "valid" : "invalid") << "!\n";
   }
 
   peparse::DestructParsedPE(pe);

@@ -53,6 +53,7 @@ void OpenSSL_free(void *ptr);
  */
 using BIO_ptr = std::unique_ptr<BIO, decltype(&BIO_free)>;
 using ASN1_OBJECT_ptr = std::unique_ptr<ASN1_OBJECT, decltype(&ASN1_OBJECT_free)>;
+using ASN1_TYPE_ptr = std::unique_ptr<ASN1_TYPE, decltype(&ASN1_TYPE_free)>;
 using OpenSSL_ptr = std::unique_ptr<char, decltype(&OpenSSL_free)>;
 using BN_ptr = std::unique_ptr<BIGNUM, decltype(&BN_free)>;
 using STACK_OF_X509_ptr = std::unique_ptr<STACK_OF(X509), decltype(&sk_X509_free)>;
@@ -60,6 +61,7 @@ using STACK_OF_X509_ptr = std::unique_ptr<STACK_OF(X509), decltype(&sk_X509_free
 using SectionList = std::vector<const peparse::bounded_buffer *>;
 
 constexpr auto SPC_INDIRECT_DATA_OID = "1.3.6.1.4.1.311.2.1.4";
+constexpr auto SPC_NESTED_SIGNATURE_OID = "1.3.6.1.4.1.311.2.4.1";
 }  // namespace impl
 
 /**
@@ -198,6 +200,12 @@ class SignedData {
    * @return a list of Certificate instances
    */
   std::vector<Certificate> get_certificates() const;
+
+  /**
+   * @return a new SignedData for any nested signature within this SignedData,
+   * or `std::nullopt` if this SignedData has no nested signature.
+   */
+  std::optional<SignedData> get_nested_signed_data() const;
 
  private:
   impl::Authenticode_SpcIndirectDataContent *get_indirect_data() const;
