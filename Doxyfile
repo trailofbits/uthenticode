@@ -3,6 +3,7 @@ PROJECT_NUMBER         = $(VERSION)
 STRIP_FROM_PATH        = src/
 INPUT                  = README.md src
 FILE_PATTERNS          = *.h *.cpp
+EXCLUDE_PATTERNS       = */vendor/*
 RECURSIVE              = YES
 EXTRACT_ALL            = YES
 USE_MDFILE_AS_MAINPAGE = README.md

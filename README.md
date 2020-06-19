@@ -12,7 +12,7 @@ digital signatures.
 Authenticode is Microsoft's code signing technology, designed to allow signing
 and verification of programs.
 
-*uthenticode* is a cross-platform reimplementation of the verification side of Authenticode.
+*μthenticode* is a cross-platform reimplementation of the verification side of Authenticode.
 It doesn't attempt to provide the signing side.
 
 ## Why?
@@ -30,15 +30,15 @@ timestamps, but is long-abandoned and CLI-focused.
 
 ## Beware!
 
-*uthenticode* is **not** identical to the `Wintrust` API. Crucially, it **cannot** perform full-chain
+*μthenticode* is **not** identical to the `Wintrust` API. Crucially, it **cannot** perform full-chain
 verifications of Authenticode signatures, as it lacks access to the Trusted Publishers store.
 
-You should use *uthenticode* to verify the embedded chain. You should **not** assume that a "verified"
-binary from *uthenticode*'s perspective will run on an unmodified Windows system.
+You should use *μthenticode* to verify the embedded chain. You should **not** assume that a "verified"
+binary from *μthenticode*'s perspective will run on an unmodified Windows system.
 
 ## Building
 
-*uthenticode* depends on [pe-parse](https://github.com/trailofbits/pe-parse) and OpenSSL 1.1.0.
+*μthenticode* depends on [pe-parse](https://github.com/trailofbits/pe-parse) and OpenSSL 1.1.0.
 
 pe-parse (and OpenSSL, if you don't already have it) can be installed via `vcpkg`:
 
@@ -57,7 +57,7 @@ $ cmake --build .
 $ cmake --build . --target install
 ```
 
-If you have `doxygen` installed, you can build *uthenticode*'s documentation with the top-level
+If you have `doxygen` installed, you can build *μthenticode*'s documentation with the top-level
 `Makefile`:
 
 ```bash
@@ -70,10 +70,10 @@ You can build the (gtest-based) unit tests with `-DBUILD_TESTS=1`.
 
 ## Usage
 
-*uthenticode*'s public API is documented in `uthenticode.h` and in the Doxygen documentation
+*μthenticode*'s public API is documented in `uthenticode.h` and in the Doxygen documentation
 (see above).
 
-The `svcli` utility also provides a small example of using *uthenticode*'s APIs. You can build it
+The `svcli` utility also provides a small example of using *μthenticode*'s APIs. You can build it
 by passing `-DBUILD_SVCLI=1` to `cmake`:
 
 ```bash

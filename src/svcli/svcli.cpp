@@ -12,16 +12,29 @@
 #include <iomanip>
 #include <iostream>
 
+#include "vendor/argh.h"
+
 using checksum_kind = uthenticode::checksum_kind;
 
 int main(int argc, char const *argv[]) {
-  if (argc != 2) {
-    return 1;
+  argh::parser cmdl(argv);
+
+  if (cmdl[{"-v", "--version"}]) {
+    std::cout << "svcli (uthenticode) version " << UTHENTICODE_VERSION << '\n';
+    return 0;
+  } else if (cmdl[{"-h", "--help"}] || argc != 2) {
+    std::cout << "Usage: svcli [options] <file>\n\n"
+              << "Options:\n"
+              << "\t-v, --version\tPrint the version and exit\n"
+              << "\t-h, --help\tPrint this help message and exit\n\n"
+              << "Arguments:\n"
+              << "\t<file>\tThe PE to parse for Authenticode data\n";
+    return 0;
   }
 
-  auto *pe = peparse::ParsePEFromFile(argv[1]);
+  auto *pe = peparse::ParsePEFromFile(cmdl[1].c_str());
   if (pe == nullptr) {
-    std::cerr << "pe-parse failure: " << peparse::GetPEErrString() << '\n';
+    std::cerr << "pe-parse failure: " << cmdl[1] << ": " << peparse::GetPEErrString() << '\n';
     return 1;
   }
 
@@ -34,7 +47,7 @@ int main(int argc, char const *argv[]) {
     return 1;
   }
 
-  std::cout << argv[1] << " has " << certs.size() << " certificate entries\n\n";
+  std::cout << cmdl[1] << " has " << certs.size() << " certificate entries\n\n";
 
   std::cout << "Calculated checksums:\n";
   std::array<checksum_kind, 3> kinds = {
