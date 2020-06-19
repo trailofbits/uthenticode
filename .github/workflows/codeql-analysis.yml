@@ -41,8 +41,18 @@ jobs:
       # with:
       #   languages: go, javascript, csharp, python, cpp, java
 
-    - name: Autobuild
-      uses: github/codeql-action/autobuild@v1
+    - name: configure
+      run: |
+        mkdir build && cd build
+        cmake \
+          -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DBUILD_SVCLI=1 \
+          ..
+
+    - name: build
+      working-directory: build
+      run: cmake --build .
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
