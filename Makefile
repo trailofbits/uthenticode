@@ -1,6 +1,16 @@
 CLANG_FORMAT := clang-format
-ALL_SRCS := $(shell find src test -type f \( -name '*.cpp' -o -name '*.h' \) -print)
-ALL_LISTFILES := $(shell find src test cmake -type f \( -name 'CMakeLists.txt' -o -name '*.cmake' \) -print)
+ALL_SRCS := $(shell \
+	find src test \
+		-type f \
+		\( -path */vendor/* \) -prune \
+		-o \( -name '*.cpp' -o -name '*.h' \) \
+		-print \
+)
+ALL_LISTFILES := $(shell \
+	find src test cmake \
+		-type f \( -name 'CMakeLists.txt' -o -name '*.cmake' \) \
+		-print \
+)
 VERSION := $(shell cat VERSION)
 
 PEPARSE_VERSION ?= v1.2.0
