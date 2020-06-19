@@ -1,0 +1,58 @@
+name: "Code scanning - action"
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 22 * * 3'
+
+env:
+  vcpkg-commit: 422fb5df87f6ae2d01a6ccdca7211a54c0e88fa1
+  vcpkg-install: pe-parse
+
+jobs:
+  CodeQL-Build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 2
+
+    - run: git checkout HEAD^2
+      if: ${{ github.event_name == 'pull_request' }}
+
+    - name: Restore from cache and install vcpkg
+      uses: lukka/run-vcpkg@v2
+      with:
+        vcpkgGitCommitId: ${{ env.vcpkg-commit }}
+        vcpkgArguments: ${{ env.vcpkg-install }}
+
+    - name: Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libssl-dev
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v1
+      # Override language selection by uncommenting this and choosing your languages
+      # with:
+      #   languages: go, javascript, csharp, python, cpp, java
+
+    - name: configure
+      run: |
+        mkdir build && cd build
+        cmake \
+          -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DBUILD_SVCLI=1 \
+          ..
+
+    - name: build
+      working-directory: build
+      run: cmake --build .
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v1
