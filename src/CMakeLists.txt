@@ -2,11 +2,8 @@ cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 
 project(uthenticode)
 
-find_package(
-  OpenSSL 1.1
-  COMPONENTS Crypto
-  REQUIRED
-)
+find_package(pe-parse REQUIRED)
+find_package(OpenSSL 1.1 COMPONENTS Crypto REQUIRED)
 
 add_library("${PROJECT_NAME}" uthenticode.cpp)
 
