@@ -30,7 +30,7 @@ target_include_directories(
 set_target_properties("${PROJECT_NAME}" PROPERTIES PUBLIC_HEADER "include/uthenticode.h")
 
 target_link_libraries("${PROJECT_NAME}" PUBLIC pe-parse::pe-parser-library)
-target_link_libraries("${PROJECT_NAME}" PRIVATE "${OPENSSL_CRYPTO_LIBRARY}")
+target_link_libraries("${PROJECT_NAME}" PUBLIC OpenSSL::Crypto)
 
 # NOTE(ww): More CMake dumbness: linking to OpenSSL statically above apparently doesn't transitively
 # link pthread or libdl correctly. We fix them up here.
@@ -41,7 +41,7 @@ endif ()
 
 install(
   TARGETS "${PROJECT_NAME}"
-  EXPORT uthenticode-config
+  EXPORT uthenticode-targets
   RUNTIME DESTINATION "bin"
   LIBRARY DESTINATION "lib"
   ARCHIVE DESTINATION "lib"
@@ -50,11 +50,12 @@ install(
 export(
   TARGETS "${PROJECT_NAME}"
   NAMESPACE uthenticode::
-  FILE "${CMAKE_CURRENT_BINARY_DIR}/uthenticode-config.cmake"
+  FILE "${CMAKE_CURRENT_BINARY_DIR}/uthenticode-targets.cmake"
 )
 install(
-  EXPORT uthenticode-config
+  EXPORT uthenticode-targets
   DESTINATION "lib/cmake/uthenticode"
   NAMESPACE uthenticode::
   EXPORT_LINK_INTERFACE_LIBRARIES
 )
+install(FILES uthenticode-config.cmake DESTINATION "lib/cmake/uthenticode")
