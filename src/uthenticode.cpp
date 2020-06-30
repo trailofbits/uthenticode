@@ -578,6 +578,19 @@ bool verify(peparse::parsed_pe *pe) {
     verified_checksum =
         verified_checksum && std::get<std::string>(embedded_checksum) ==
                                  calculate_checksum(pe, std::get<checksum_kind>(embedded_checksum));
+
+    const auto nested_signed_data = signed_data->get_nested_signed_data();
+    if (!nested_signed_data) {
+      continue;
+    }
+
+    auto nested_embedded_checksum = nested_signed_data->get_checksum();
+
+    verified_signed_data = verified_signed_data && nested_signed_data->verify_signature();
+    verified_checksum =
+        verified_checksum &&
+        std::get<std::string>(nested_embedded_checksum) ==
+            calculate_checksum(pe, std::get<checksum_kind>(nested_embedded_checksum));
   }
 
   return has_signed_data && verified_signed_data && verified_checksum;
