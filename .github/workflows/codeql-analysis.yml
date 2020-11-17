@@ -25,7 +25,7 @@ jobs:
       if: ${{ github.event_name == 'pull_request' }}
 
     - name: Restore from cache and install vcpkg
-      uses: lukka/run-vcpkg@v2
+      uses: lukka/run-vcpkg@v5
       with:
         vcpkgGitCommitId: ${{ env.vcpkg-commit }}
         vcpkgArguments: ${{ env.vcpkg-install }}
