@@ -13,7 +13,7 @@ on:
     - cron:  '0 12 * * *'
 
 env:
-  vcpkg-commit: 422fb5df87f6ae2d01a6ccdca7211a54c0e88fa1
+  vcpkg-commit: 79d9a154d9631093f507da4b0032e5737606efaa
   vcpkg-install: pe-parse
 
 jobs:
