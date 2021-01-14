@@ -71,6 +71,8 @@ if(BUILD_TESTS)
     if(CMAKE_VERSION VERSION_LESS 2.8.11)
       include_directories("${gtest_SOURCE_DIR}/include")
     endif()
+  else()
+    find_package(GTest CONFIG REQUIRED)
   endif()
 
   add_subdirectory(test)
