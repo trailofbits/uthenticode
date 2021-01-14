@@ -29,8 +29,8 @@ endif()
 
 # gtest setup. Adapted roughly from the googletest README.
 if(BUILD_TESTS)
-  option(USE_SYSTEM_GTEST "Use the system-installed Google Test library rather than downloading and building it" OFF)
-  if(NOT USE_SYSTEM_GTEST)
+  option(USE_EXTERNAL_GTEST "Advanced use only. Use an external Google Test library rather than downloading and building it" OFF)
+  if(NOT USE_EXTERNAL_GTEST)
     set(gtest_cmake_in "${CMAKE_CURRENT_SOURCE_DIR}/cmake/gtest.cmake.in")
     set(gtest_cmake
         "${CMAKE_CURRENT_BINARY_DIR}/googletest-download/CMakeLists.txt")
@@ -72,6 +72,7 @@ if(BUILD_TESTS)
       include_directories("${gtest_SOURCE_DIR}/include")
     endif()
   else()
+    message(WARNING "It is STRONGLY recommended to *NOT* set USE_EXTERNAL_GTEST unless you know how to debug build systems and dependencies")
     find_package(GTest CONFIG REQUIRED)
   endif()
 

@@ -10,7 +10,7 @@ file(
 
 add_executable("${PROJECT_NAME}" ${UTHENTICODE_TEST_SOURCES})
 add_test(NAME "${PROJECT_NAME}" COMMAND "${PROJECT_NAME}")
-if (NOT USE_SYSTEM_GTEST)
+if (NOT USE_EXTERNAL_GTEST)
   target_link_libraries("${PROJECT_NAME}" PUBLIC uthenticode gtest)
 else ()
   target_link_libraries("${PROJECT_NAME}" PUBLIC uthenticode GTest::gtest)
