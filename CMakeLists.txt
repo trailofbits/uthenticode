@@ -29,6 +29,7 @@ endif()
 
 # gtest setup. Adapted roughly from the googletest README.
 if(BUILD_TESTS)
+  option(USE_SYSTEM_GTEST "Use the system-installed Google Test library rather than downloading and building it" OFF)
   if(NOT USE_SYSTEM_GTEST)
     set(gtest_cmake_in "${CMAKE_CURRENT_SOURCE_DIR}/cmake/gtest.cmake.in")
     set(gtest_cmake
