@@ -22,7 +22,7 @@ jobs:
         fetch-depth: 2
 
     - name: Restore from cache and install vcpkg
-      uses: lukka/run-vcpkg@v5
+      uses: lukka/run-vcpkg@v6
       with:
         vcpkgGitCommitId: ${{ env.vcpkg-commit }}
         vcpkgArguments: ${{ env.vcpkg-install }}
