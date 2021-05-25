@@ -13,7 +13,7 @@ ALL_LISTFILES := $(shell \
 )
 VERSION := $(shell cat VERSION)
 
-PEPARSE_VERSION ?= v1.2.0
+PEPARSE_VERSION ?= v1.3.0
 
 .PHONY: all
 all:
