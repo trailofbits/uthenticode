@@ -33,7 +33,7 @@ set_target_properties("${PROJECT_NAME}" PROPERTIES PUBLIC_HEADER "include/uthent
 # Newer versions of pe-parse use the `pe-parse` target. This check should be
 # removed once the releases on vcpkg stabilize.
 if (TARGET pe-parse::pe-parse)
-  target_link_libraries("${PROJECT_NAME}" PUBLIC pe-parse::pe-pars)
+  target_link_libraries("${PROJECT_NAME}" PUBLIC pe-parse::pe-parse)
 else ()
   target_link_libraries("${PROJECT_NAME}" PUBLIC pe-parse::pe-parser-library)
 endif ()
