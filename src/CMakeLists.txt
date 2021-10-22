@@ -30,15 +30,7 @@ target_include_directories(
 # even when set explicitly as PUBLIC. We set it here so that it works correctly in the install step.
 set_target_properties("${PROJECT_NAME}" PROPERTIES PUBLIC_HEADER "include/uthenticode.h")
 
-# Newer versions of pe-parse use the `pe-parse` target. This check should be removed once the
-# releases on vcpkg stabilize.
-if (TARGET pe-parse::pe-parse)
-  target_link_libraries("${PROJECT_NAME}" PUBLIC pe-parse::pe-parse)
-else ()
-  target_link_libraries("${PROJECT_NAME}" PUBLIC pe-parse::pe-parser-library)
-endif ()
-
-target_link_libraries("${PROJECT_NAME}" PUBLIC OpenSSL::Crypto)
+target_link_libraries("${PROJECT_NAME}" PUBLIC pe-parse::pe-parse OpenSSL::Crypto)
 
 install(
   TARGETS "${PROJECT_NAME}"
