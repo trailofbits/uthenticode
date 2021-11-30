@@ -86,7 +86,7 @@ $ ./src/svcli/svcli /path/to/some.exe
 
 The following resources were essential to *uthenticode*'s development:
 
-* The [`osslsigncode`](https://sourceforge.net/projects/osslsigncode/) codebase
+* The [`osslsigncode`](https://github.com/mtrojnar/osslsigncode) codebase
 * ClamAV's [Authenticode documentation](https://www.clamav.net/documents/microsoft-authenticode-signature-verification)
 * Microsoft's [Authenticode specification](http://download.microsoft.com/download/9/c/5/9c5b2167-8017-4bae-9fde-d599bac8184a/Authenticode_PE.docx) (circa 2008)
 * Peter Gutmann's [Authenticode format notes](https://www.cs.auckland.ac.nz/~pgut001/pubs/authenticode.txt)
