@@ -7,6 +7,8 @@ uthenticode
 [Authenticode](https://docs.microsoft.com/en-us/windows-hardware/drivers/install/authenticode)
 digital signatures.
 
+[Read our blog post on verifying Windows binaries without Windows!](https://blog.trailofbits.com/2020/05/27/verifying-windows-binaries-without-windows/).
+
 ## What?
 
 Authenticode is Microsoft's code signing technology, designed to allow signing
