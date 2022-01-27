@@ -10,7 +10,7 @@ on:
   pull_request:
 
 env:
-  vcpkg-commit: fd67439f01bfec989f7b1505f3b2f10f771470a3
+  vcpkg-commit: 8b62f6fff30c4321945f1e498d85929285d7083a
   vcpkg-install: pe-parse
 
 jobs:
