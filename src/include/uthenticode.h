@@ -4,7 +4,7 @@
 #include <openssl/asn1t.h>
 #include <openssl/crypto.h>
 #include <openssl/x509.h>
-#include <parser-library/parse.h>
+#include <pe-parse/parse.h>
 
 #include <cstdint>
 #include <exception>
