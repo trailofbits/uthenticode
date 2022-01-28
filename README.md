@@ -27,8 +27,8 @@ Other available solutions are deficient:
 
 * WINE implements most of `Wintrust`, but is a massive (and arguably non-native) dependency
 for a single task.
-* [`osslsigncode`](https://sourceforge.net/projects/osslsigncode/) can add signatures and check
-timestamps, but is long-abandoned and CLI-focused.
+* [`osslsigncode`](https://github.com/mtrojnar/osslsigncode) can add signatures and check
+timestamps, but is CLI-focused.
 
 ## Beware!
 
