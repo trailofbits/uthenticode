@@ -32,6 +32,22 @@ class Auth32Test : public ::testing::Test {
   peparse::parsed_pe *pe{nullptr};
 };
 
+class Auth32DupeTest : public ::testing::Test {
+ protected:
+  void SetUp() override {
+    auto *file = UTHENTICODE_TEST_ASSETS "/32/pegoat-authenticode_duplicated.exe";
+
+    pe = peparse::ParsePEFromFile(file);
+    ASSERT_TRUE(pe != nullptr);
+  }
+
+  void TearDown() override {
+    peparse::DestructParsedPE(pe);
+  }
+
+  peparse::parsed_pe *pe{nullptr};
+};
+
 class Auth32PlusTest : public ::testing::Test {
  protected:
   void SetUp() override {
