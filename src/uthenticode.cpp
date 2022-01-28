@@ -65,18 +65,21 @@ static inline std::size_t round(std::size_t x, std::size_t factor) {
  * @return     the hex string
  */
 static inline std::string tohex(std::uint8_t *buf, std::size_t len) {
-  if (buf == nullptr) {
+  constexpr static char lookup_table[] = "0123456789ABCDEF";
+
+  if (!buf || !len) {
     return {};
   }
 
-  std::stringstream ss;
-  ss << std::hex << std::setw(2) << std::setfill('0');
+  std::string hexstr;
+  hexstr.reserve(len * 2);  // each byte creates two hex digits
 
-  for (std::size_t i = 0; i < len; ++i) {
-    ss << static_cast<int>(buf[i]);
+  for (auto i = 0; i < len; i++) {
+    hexstr += lookup_table[buf[i] >> 4];
+    hexstr += lookup_table[buf[i] & 0xF];
   }
 
-  return ss.str();
+  return hexstr;
 }
 
 /**
