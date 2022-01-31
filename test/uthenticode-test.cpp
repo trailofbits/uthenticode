@@ -25,6 +25,16 @@ TEST_F(Auth32Test, read_certs) {
   EXPECT_TRUE(certs[0].as_signed_data().has_value());
 }
 
+TEST_F(Auth32DupeTest, read_certs) {
+  auto certs = uthenticode::read_certs(pe);
+
+  EXPECT_EQ(certs.size(), 2);
+  for (size_t index = 0; index < certs.size(); index++) {
+    SCOPED_TRACE("certificate # = " + std::to_string(index));
+    EXPECT_TRUE(certs[index].as_signed_data().has_value());
+  }
+}
+
 TEST_F(Auth32PlusTest, read_certs) {
   auto certs = uthenticode::read_certs(pe);
 
@@ -43,6 +53,17 @@ TEST_F(Auth32Test, get_checksums) {
 
   EXPECT_EQ(checksums.size(), 1);
   EXPECT_EQ(std::get<uthenticode::checksum_kind>(checksums[0]), uthenticode::checksum_kind::SHA1);
+}
+
+TEST_F(Auth32DupeTest, get_checksums) {
+  auto checksums = uthenticode::get_checksums(pe);
+
+  EXPECT_EQ(checksums.size(), 2);
+  for (size_t index = 0; index < checksums.size(); index++) {
+    SCOPED_TRACE("checksum # = " + std::to_string(index));
+    EXPECT_EQ(std::get<uthenticode::checksum_kind>(checksums[index]),
+              uthenticode::checksum_kind::SHA1);
+  }
 }
 
 TEST_F(Auth32PlusTest, get_checksums) {
@@ -88,6 +109,24 @@ TEST_F(Auth32Test, calculate_checksum) {
                    "ea013992f99840f76dcac225dd1262edcec3254511b250a6d1e98d99fc48f815");
 }
 
+TEST_F(Auth32DupeTest, calculate_checksum) {
+  auto unk = uthenticode::calculate_checksum(pe, uthenticode::checksum_kind::UNKNOWN);
+  EXPECT_TRUE(unk.empty());
+
+  auto md5 = uthenticode::calculate_checksum(pe, uthenticode::checksum_kind::MD5);
+  EXPECT_EQ(md5.size(), 32);
+  EXPECT_STRCASEEQ(md5.c_str(), "64c29391b57679b2973ac562cf64685d");
+
+  auto sha1 = uthenticode::calculate_checksum(pe, uthenticode::checksum_kind::SHA1);
+  EXPECT_EQ(sha1.size(), 40);
+  EXPECT_STRCASEEQ(sha1.c_str(), "6663dd7c24fa84fce7f16e0b02689952c06cfa22");
+
+  auto sha256 = uthenticode::calculate_checksum(pe, uthenticode::checksum_kind::SHA256);
+  EXPECT_EQ(sha256.size(), 64);
+  EXPECT_STRCASEEQ(sha256.c_str(),
+                   "ea013992f99840f76dcac225dd1262edcec3254511b250a6d1e98d99fc48f815");
+}
+
 TEST_F(Auth32PlusTest, calculate_checksum) {
   auto unk = uthenticode::calculate_checksum(pe, uthenticode::checksum_kind::UNKNOWN);
   EXPECT_TRUE(unk.empty());
@@ -115,6 +154,13 @@ TEST_F(NoAuthTest, verify) {
 }
 
 TEST_F(Auth32Test, verify) {
+  EXPECT_TRUE(uthenticode::verify(pe));
+}
+
+TEST_F(Auth32DupeTest, verify) {
+  // File is doctored and therefore signatures (and PE checksum) are invalid, but
+  // this isn't checked here. Instead this checks the signature, but not _against_
+  // the file hash (minus checksum, minus security data directory).
   EXPECT_TRUE(uthenticode::verify(pe));
 }
 

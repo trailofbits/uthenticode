@@ -389,25 +389,30 @@ std::vector<WinCert> read_certs(peparse::parsed_pe *pe) {
    * bCertificate (uint8_t[dwLength - 8]): the raw certificate data in this entry
    */
   std::vector<WinCert> certs;
-  size_t offset = 0;
-  while (offset < raw_cert_table.size()) {
-    std::uint32_t length = *reinterpret_cast<std::uint32_t *>(raw_cert_table.data() + offset);
+  auto *current_wincert = raw_cert_table.data();
+  auto const *const past_secdir = raw_cert_table.data() + raw_cert_table.size();
+  // Let us tread carefully, we expect all members of WIN_CERTIFICATE up to bCertificate
+  while (current_wincert + 8 < past_secdir) {
+    size_t offset = 0;
+    std::uint32_t length = *reinterpret_cast<std::uint32_t *>(current_wincert + offset);
     offset += sizeof(length);
 
-    std::uint16_t revision = *reinterpret_cast<std::uint16_t *>(raw_cert_table.data() + offset);
+    std::uint16_t revision = *reinterpret_cast<std::uint16_t *>(current_wincert + offset);
     offset += sizeof(revision);
 
-    std::uint16_t type = *reinterpret_cast<std::uint16_t *>(raw_cert_table.data() + offset);
+    std::uint16_t type = *reinterpret_cast<std::uint16_t *>(current_wincert + offset);
     offset += sizeof(type);
 
-    std::vector<std::uint8_t> cert_data(raw_cert_table.data() + offset,
-                                        raw_cert_table.data() + length);
+    // Continue only we can satisfy the length
+    if (current_wincert + length <= past_secdir) {
+      std::vector<std::uint8_t> cert_data(current_wincert + offset, current_wincert + length);
 
-    certs.emplace_back(static_cast<certificate_revision>(revision),
-                       static_cast<certificate_type>(type),
-                       cert_data);
+      certs.emplace_back(static_cast<certificate_revision>(revision),
+                         static_cast<certificate_type>(type),
+                         cert_data);
+    }
 
-    offset += round(length, 8);
+    current_wincert += round(length, 8);
   }
 
   return certs;

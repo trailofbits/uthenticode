@@ -25,6 +25,30 @@ TEST_F(Auth32Test, SignedData_properties) {
   ASSERT_EQ(signed_data->get_nested_signed_data(), std::nullopt);
 }
 
+TEST_F(Auth32DupeTest, SignedData_properties) {
+  auto certs = uthenticode::read_certs(pe);
+  EXPECT_EQ(certs.size(), 2);
+
+  for (size_t index = 0; index < certs.size(); index++) {
+    SCOPED_TRACE("certificate # = " + std::to_string(index));
+    auto signed_data = certs[index].as_signed_data();
+
+    ASSERT_TRUE(signed_data.has_value());
+
+    ASSERT_EQ(signed_data->get_signers().size(), 1);
+    ASSERT_EQ(signed_data->get_certificates().size(), 1);
+    ASSERT_TRUE(signed_data->verify_signature());
+
+    auto checksum = signed_data->get_checksum();
+    ASSERT_EQ(std::get<uthenticode::checksum_kind>(checksum), uthenticode::checksum_kind::SHA1);
+    auto const checksumstr = std::get<std::string>(checksum);
+    ASSERT_EQ(checksumstr.size(), 40);
+    ASSERT_STRCASEEQ(checksumstr.c_str(), "6663dd7c24fa84fce7f16e0b02689952c06cfa22");
+
+    ASSERT_EQ(signed_data->get_nested_signed_data(), std::nullopt);
+  }
+}
+
 TEST_F(Auth32PlusTest, SignedData_properties) {
   auto certs = uthenticode::read_certs(pe);
   auto signed_data = certs[0].as_signed_data();
