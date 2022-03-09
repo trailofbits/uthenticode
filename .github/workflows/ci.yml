@@ -37,7 +37,6 @@ jobs:
          - { flag: "0", repr: "static" }
         compiler:
         - { CC: "clang", CXX: "clang++" }
-        - { CC: "gcc", CXX: "g++" }
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
