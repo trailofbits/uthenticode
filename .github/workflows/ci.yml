@@ -37,7 +37,6 @@ jobs:
          - { flag: "0", repr: "static" }
         compiler:
         - { CC: "clang", CXX: "clang++" }
-        - { CC: "gcc", CXX: "g++" }
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -177,7 +176,7 @@ jobs:
         mkdir build
         cd build
         cmake \
-          -G "Visual Studio 16 2019" \
+          -G "Visual Studio 17 2022" \
           -A ${{ matrix.build-arch.arch }} \
           -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
           -DBUILD_SVCLI=1 \
