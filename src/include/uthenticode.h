@@ -48,6 +48,7 @@ DECLARE_ASN1_FUNCTIONS(Authenticode_SpcIndirectDataContent)
  * So we wrap it here for use with unique_ptr.
  */
 void OpenSSL_free(void *ptr);
+void SK_X509_free(stack_st_X509 *ptr);
 
 /* Convenient self-releasing aliases for libcrypto and custom ASN.1 types.
  */
@@ -56,7 +57,7 @@ using ASN1_OBJECT_ptr = std::unique_ptr<ASN1_OBJECT, decltype(&ASN1_OBJECT_free)
 using ASN1_TYPE_ptr = std::unique_ptr<ASN1_TYPE, decltype(&ASN1_TYPE_free)>;
 using OpenSSL_ptr = std::unique_ptr<char, decltype(&OpenSSL_free)>;
 using BN_ptr = std::unique_ptr<BIGNUM, decltype(&BN_free)>;
-using STACK_OF_X509_ptr = std::unique_ptr<STACK_OF(X509), decltype(&sk_X509_free)>;
+using STACK_OF_X509_ptr = std::unique_ptr<STACK_OF(X509), decltype(&SK_X509_free)>;
 
 using SectionList = std::vector<const peparse::bounded_buffer *>;
 
