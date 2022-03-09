@@ -39,6 +39,11 @@ IMPLEMENT_ASN1_FUNCTIONS(Authenticode_SpcIndirectDataContent)
 void OpenSSL_free(void *ptr) {
   OPENSSL_free(ptr);
 }
+
+void SK_X509_free(stack_st_X509 *ptr) {
+  sk_X509_free(ptr);
+}
+
 // clang-format on
 }  // namespace impl
 
@@ -255,7 +260,7 @@ std::vector<Certificate> SignedData::get_signers() const {
   if (signers_stack_ptr == nullptr) {
     return {};
   }
-  auto signers_stack = impl::STACK_OF_X509_ptr(signers_stack_ptr, sk_X509_free);
+  auto signers_stack = impl::STACK_OF_X509_ptr(signers_stack_ptr, impl::SK_X509_free);
 
   std::vector<Certificate> signers;
   for (auto i = 0; i < sk_X509_num(signers_stack.get()); ++i) {
