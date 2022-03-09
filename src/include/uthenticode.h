@@ -48,6 +48,10 @@ DECLARE_ASN1_FUNCTIONS(Authenticode_SpcIndirectDataContent)
  * So we wrap it here for use with unique_ptr.
  */
 void OpenSSL_free(void *ptr);
+
+/* Since OpenSSL 3.0.0 SK_X509_free is defined as a macro, which we can't use with decltype.
+ * So we wrap it here for use with unique_ptr.
+ */
 void SK_X509_free(stack_st_X509 *ptr);
 
 /* Convenient self-releasing aliases for libcrypto and custom ASN.1 types.
