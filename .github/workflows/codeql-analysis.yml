@@ -12,12 +12,13 @@ env:
 
 jobs:
   CodeQL-Build:
-
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         fetch-depth: 2
 
@@ -34,9 +35,6 @@ jobs:
 
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v1
-      # Override language selection by uncommenting this and choosing your languages
-      # with:
-      #   languages: go, javascript, csharp, python, cpp, java
 
     - name: configure
       run: |
