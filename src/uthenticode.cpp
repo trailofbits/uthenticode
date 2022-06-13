@@ -409,7 +409,7 @@ std::vector<WinCert> read_certs(peparse::parsed_pe *pe) {
     offset += sizeof(type);
 
     // Continue only we can satisfy the length
-    if (current_wincert + length <= past_secdir) {
+    if (current_wincert + length <= past_secdir && length > offset) {
       std::vector<std::uint8_t> cert_data(current_wincert + offset, current_wincert + length);
 
       certs.emplace_back(static_cast<certificate_revision>(revision),
@@ -417,7 +417,7 @@ std::vector<WinCert> read_certs(peparse::parsed_pe *pe) {
                          cert_data);
     }
 
-    current_wincert += round(length, 8);
+    current_wincert += std::max<std::size_t>(round(length, 8), 8);
   }
 
   return certs;
