@@ -520,8 +520,7 @@ std::string calculate_checksum(peparse::parsed_pe *pe, checksum_kind kind) {
   EVP_DigestInit(md_ctx, md);
   EVP_DigestUpdate(md_ctx, pe_bits.data(), pe_bits.size());
 
-  if (security_dir.VirtualAddress > 0)
-  {
+  if (security_dir.VirtualAddress > 0) {
     /* If a certificate table exists, hash everything before and after it.
      */
     EVP_DigestUpdate(md_ctx,
@@ -534,14 +533,11 @@ std::string calculate_checksum(peparse::parsed_pe *pe, checksum_kind kind) {
     EVP_DigestUpdate(md_ctx,
                      pe->fileBuffer->buf + security_dir.VirtualAddress + security_dir.Size,
                      pe->fileBuffer->bufLen - (security_dir.VirtualAddress + security_dir.Size));
-  }
-  else
-  {
+  } else {
     /* If there's no certificate table, just hash the rest of the file.
      */
-    EVP_DigestUpdate(md_ctx,
-                     pe->fileBuffer->buf + size_of_headers,
-                     pe->fileBuffer->bufLen - size_of_headers);
+    EVP_DigestUpdate(
+        md_ctx, pe->fileBuffer->buf + size_of_headers, pe->fileBuffer->bufLen - size_of_headers);
   }
 
   /* Finally, finish hashing the damn thing.
