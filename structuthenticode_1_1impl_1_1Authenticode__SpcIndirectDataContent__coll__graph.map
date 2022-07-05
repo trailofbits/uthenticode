@@ -1,0 +1,5 @@
+<map id="uthenticode::impl::Authenticode_SpcIndirectDataContent" name="uthenticode::impl::Authenticode_SpcIndirectDataContent">
+<area shape="rect" id="node1" title=" " alt="" coords="384,35,603,91"/>
+<area shape="rect" id="node2" href="$structuthenticode_1_1impl_1_1Authenticode__DigestInfo.html" title=" " alt="" coords="27,5,209,47"/>
+<area shape="rect" id="node3" href="$structuthenticode_1_1impl_1_1Authenticode__SpcAttributeTypeAndOptionalValue.html" title=" " alt="" coords="5,71,231,127"/>
+</map>
