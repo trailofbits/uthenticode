@@ -11,6 +11,7 @@
 #include <iostream>
 #include <memory>
 #include <sstream>
+#include <utility>
 
 namespace uthenticode {
 namespace impl {
