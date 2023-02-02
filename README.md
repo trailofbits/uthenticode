@@ -1,7 +1,7 @@
 uthenticode
 ==========
 
-[![Build Status](https://img.shields.io/github/workflow/status/trailofbits/uthenticode/CI/master)](https://github.com/trailofbits/uthenticode/actions?query=workflow%3ACI)
+[![Tests](https://github.com/trailofbits/uthenticode/actions/workflows/tests.yml/badge.svg)](https://github.com/trailofbits/uthenticode/actions/workflows/tests.yml)
 
 *uthenticode* (stylized as *μthenticode*) is a small cross-platform library for verifying
 [Authenticode](https://docs.microsoft.com/en-us/windows-hardware/drivers/install/authenticode)
