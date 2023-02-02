@@ -29,7 +29,7 @@ Other available solutions are deficient:
 * [`osslsigncode`](https://github.com/mtrojnar/osslsigncode) can add signatures
   and check timestamps, but is CLI-focused.
 
-## Beware!
+## Caveats
 
 *μthenticode* is **not** identical to the `Wintrust` API. Crucially, it
 **cannot** perform full-chain verifications of Authenticode signatures, as it
@@ -94,6 +94,8 @@ The following resources were essential to *uthenticode*'s development:
 
 * The [`osslsigncode`](https://github.com/mtrojnar/osslsigncode) codebase
 * ClamAV's [Authenticode documentation](https://www.clamav.net/documents/microsoft-authenticode-signature-verification)
-* Microsoft's [Authenticode specification](http://download.microsoft.com/download/9/c/5/9c5b2167-8017-4bae-9fde-d599bac8184a/Authenticode_PE.docx) (circa 2008)
+* Microsoft's
+  [Authenticode specification](http://download.microsoft.com/download/9/c/5/9c5b2167-8017-4bae-9fde-d599bac8184a/Authenticode_PE.docx)
+  (circa 2008)
 * Peter Gutmann's [Authenticode format notes](https://www.cs.auckland.ac.nz/~pgut001/pubs/authenticode.txt)
 * [RFC5652](https://tools.ietf.org/html/rfc5652)
