@@ -14,20 +14,6 @@ env:
   vcpkg-install: pe-parse
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: deps
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y clang-format-9
-          sudo pip3 install cmake-format
-
-      - name: lint
-        run: make format
-
   build-linux:
     strategy:
       matrix:

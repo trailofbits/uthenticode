@@ -1,0 +1,33 @@
+name: Lint
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  # lint-source:
+  #   name: Lint Python
+  #   uses: trailofbits/.github/.github/workflows/lint.yml@ww/clang-format
+  #   with:
+  #     language: c++
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-format
+          sudo pip3 install cmake-format
+
+      - name: lint
+        run: make format
+
+  lint-md:
+    name: Lint Markdown
+    uses: trailofbits/.github/.github/workflows/lint.yml@v0.0.4
+    with:
+      language: markdown
