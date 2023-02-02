@@ -195,3 +195,19 @@ jobs:
         asset_path: build.zip
         asset_name: windows.${{ matrix.build-arch.arch }}.${{ matrix.build-type }}.zip
         asset_content_type: application/zip
+
+  all-tests-pass:
+    if: always()
+
+    needs:
+    - build-linux
+    - build-macos
+    - build-windows
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: check test jobs
+        uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # v1.2.2
+        with:
+          jobs: ${{ toJSON(needs) }}
