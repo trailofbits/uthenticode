@@ -31,7 +31,6 @@ jobs:
       uses: lukka/run-vcpkg@v10
       with:
         vcpkgGitCommitId: ${{ env.vcpkg-commit }}
-        vcpkgArguments: ${{ env.vcpkg-install }}
 
     - name: deps
       run: |
@@ -96,7 +95,6 @@ jobs:
         uses: lukka/run-vcpkg@v10
         with:
           vcpkgGitCommitId: ${{ env.vcpkg-commit }}
-          vcpkgArguments: ${{ env.vcpkg-install }} openssl
 
       - name: configure
         run: |
@@ -146,6 +144,8 @@ jobs:
         - { arch: "Win32", triplet: "x86-windows" }
         build-type: ["Debug", "Release"]
     runs-on: windows-latest
+    env:
+      VCPKG_DEFAULT_TRIPLET: ${{ matrix.build-arch.triplet }}
     steps:
     - uses: actions/checkout@v2
 
@@ -153,8 +153,6 @@ jobs:
       uses: lukka/run-vcpkg@v10
       with:
         vcpkgGitCommitId: ${{ env.vcpkg-commit }}
-        vcpkgArguments: ${{ env.vcpkg-install }} openssl
-        vcpkgTriplet: ${{ matrix.build-arch.triplet }}
 
     - name: configure
       shell: bash
