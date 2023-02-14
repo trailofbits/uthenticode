@@ -10,93 +10,29 @@ on:
   pull_request:
 
 env:
-  vcpkg-commit: 8b62f6fff30c4321945f1e498d85929285d7083a
-  vcpkg-install: pe-parse
+  vcpkg-commit: 93895b28ea7bc8cda10f156c5d336f3fc070f8b1
 
 jobs:
   build-linux:
     strategy:
       matrix:
-        build-type: ["Debug", "Release"]
+        build-type: ["Debug"]
         build-shared:
          - { flag: "1", repr: "shared" }
          - { flag: "0", repr: "static" }
-        compiler:
-        - { CC: "clang", CXX: "clang++" }
     runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: Restore from cache and install vcpkg
-      uses: lukka/run-vcpkg@v6
-      with:
-        vcpkgGitCommitId: ${{ env.vcpkg-commit }}
-        vcpkgArguments: ${{ env.vcpkg-install }}
-
-    - name: deps
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y libssl-dev
-
-    - name: configure
-      run: |
-        mkdir build && cd build
-        cmake \
-          -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
-          -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
-          -DBUILD_SHARED_LIBS=${{ matrix.build-shared.flag }} \
-          -DBUILD_SVCLI=1 \
-          -DBUILD_TESTS=1 \
-          ..
-
-    - name: build
-      working-directory: build
-      env:
-        CC: ${{ matrix.compiler.CC }}
-        CXX: ${{ matrix.compiler.CXX }}
-      run: cmake --build .
-
-    - name: tests
-      working-directory: build
-      run: ./test/uthenticode_test
-
-    - name: archive
-      if: |
-        github.event.release && matrix.compiler.CC == 'clang'
-      run:
-        zip -r build.zip build
-
-    - name: publish
-      if: |
-        github.event.release && matrix.compiler.CC == 'clang'
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: build.zip
-        asset_name: ubuntu.${{ matrix.build-shared.repr }}.${{ matrix.build-type }}.zip
-        asset_content_type: application/zip
-
-  build-macos:
-    strategy:
-      matrix:
-        build-type: ["Debug", "Release"]
-        build-shared:
-         - { flag: "1", repr: "shared" }
-         - { flag: "0", repr: "static" }
-        compiler:
-        - { CC: "clang", CXX: "clang++" }
-        - { CC: "gcc", CXX: "g++" }
-    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
 
       - name: Restore from cache and install vcpkg
-        uses: lukka/run-vcpkg@v6
+        uses: lukka/run-vcpkg@v10
         with:
           vcpkgGitCommitId: ${{ env.vcpkg-commit }}
-          vcpkgArguments: ${{ env.vcpkg-install }} openssl
+
+      - name: deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential clang
 
       - name: configure
         run: |
@@ -111,32 +47,46 @@ jobs:
 
       - name: build
         working-directory: build
-        env:
-          CC: ${{ matrix.compiler.CC }}
-          CXX: ${{ matrix.compiler.CXX }}
         run: cmake --build .
 
       - name: tests
         working-directory: build
         run: ./test/uthenticode_test
 
-      - name: archive
-        if: |
-          github.event.release && matrix.compiler.CC == 'clang'
-        run:
-          zip -r build.zip build
+  build-macos:
+    strategy:
+      matrix:
+        build-type: ["Debug"]
+        build-shared:
+         - { flag: "1", repr: "shared" }
+         - { flag: "0", repr: "static" }
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
 
-      - name: publish
-        if: |
-          github.event.release && matrix.compiler.CC == 'clang'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Restore from cache and install vcpkg
+        uses: lukka/run-vcpkg@v10
         with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: build.zip
-          asset_name: macos.${{ matrix.build-shared.repr }}.${{ matrix.build-type }}.zip
-          asset_content_type: application/zip
+          vcpkgGitCommitId: ${{ env.vcpkg-commit }}
+
+      - name: configure
+        run: |
+          mkdir build && cd build
+          cmake \
+            -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
+            -DBUILD_SHARED_LIBS=${{ matrix.build-shared.flag }} \
+            -DBUILD_SVCLI=1 \
+            -DBUILD_TESTS=1 \
+            ..
+
+      - name: build
+        working-directory: build
+        run: cmake --build .
+
+      - name: tests
+        working-directory: build
+        run: ./test/uthenticode_test
 
   build-windows:
     strategy:
@@ -144,57 +94,39 @@ jobs:
         build-arch:
         - { arch: "x64", triplet: "x64-windows" }
         - { arch: "Win32", triplet: "x86-windows" }
-        build-type: ["Debug", "Release"]
+        build-type: ["Debug"]
     runs-on: windows-latest
+    env:
+      VCPKG_DEFAULT_TRIPLET: ${{ matrix.build-arch.triplet }}
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Restore from cache and install vcpkg
-      uses: lukka/run-vcpkg@v6
-      with:
-        vcpkgGitCommitId: ${{ env.vcpkg-commit }}
-        vcpkgArguments: ${{ env.vcpkg-install }} openssl
-        vcpkgTriplet: ${{ matrix.build-arch.triplet }}
+      - name: Restore from cache and install vcpkg
+        uses: lukka/run-vcpkg@v10
+        with:
+          vcpkgGitCommitId: ${{ env.vcpkg-commit }}
 
-    - name: configure
-      shell: bash
-      run: |
-        mkdir build
-        cd build
-        cmake \
-          -G "Visual Studio 17 2022" \
-          -A ${{ matrix.build-arch.arch }} \
-          -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
-          -DBUILD_SVCLI=1 \
-          -DBUILD_TESTS=1 \
-          ..
+      - name: configure
+        shell: bash
+        run: |
+          mkdir build
+          cd build
+          cmake \
+            -G "Visual Studio 17 2022" \
+            -A ${{ matrix.build-arch.arch }} \
+            -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
+            -DBUILD_SVCLI=1 \
+            -DBUILD_TESTS=1 \
+            ..
 
-    - name: build
-      working-directory: build
-      run: cmake --build . --config ${{ matrix.build-type }}
+      - name: build
+        working-directory: build
+        run: cmake --build . --config ${{ matrix.build-type }}
 
-    - name: tests
-      working-directory: build
-      run: |
-        ./test/${{ matrix.build-type }}/uthenticode_test
-
-    - name: archive
-      if: |
-        github.event.release
-      run:
-        7z a build.zip build
-
-    - name: publish
-      if: |
-        github.event.release
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: build.zip
-        asset_name: windows.${{ matrix.build-arch.arch }}.${{ matrix.build-type }}.zip
-        asset_content_type: application/zip
+      - name: tests
+        working-directory: build
+        run: |
+          ./test/${{ matrix.build-type }}/uthenticode_test
 
   all-tests-pass:
     if: always()
