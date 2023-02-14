@@ -35,7 +35,7 @@ jobs:
       - name: deps
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential clang ninja
+          sudo apt-get install -y build-essential clang
 
       - name: configure
         run: |
