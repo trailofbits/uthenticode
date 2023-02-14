@@ -10,8 +10,7 @@ on:
   pull_request:
 
 env:
-  vcpkg-commit: 8b62f6fff30c4321945f1e498d85929285d7083a
-  vcpkg-install: pe-parse
+  vcpkg-commit: 93895b28ea7bc8cda10f156c5d336f3fc070f8b1
 
 jobs:
   build-linux:
@@ -43,6 +42,8 @@ jobs:
           cmake \
             -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
             -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
+            -DCMAKE_C_COMPILER=${{ matrix.compiler.CC }} \
+            -DCMAKE_CXX_COMPILER=${{ matrix.compiler.CXX }} \
             -DBUILD_SHARED_LIBS=${{ matrix.build-shared.flag }} \
             -DBUILD_SVCLI=1 \
             -DBUILD_TESTS=1 \
@@ -50,9 +51,6 @@ jobs:
 
       - name: build
         working-directory: build
-        env:
-          CC: ${{ matrix.compiler.CC }}
-          CXX: ${{ matrix.compiler.CXX }}
         run: cmake --build .
 
       - name: tests
