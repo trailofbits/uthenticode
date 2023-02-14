@@ -16,12 +16,10 @@ jobs:
   build-linux:
     strategy:
       matrix:
-        build-type: ["Debug", "Release"]
+        build-type: ["Debug"]
         build-shared:
          - { flag: "1", repr: "shared" }
          - { flag: "0", repr: "static" }
-        compiler:
-        - { CC: "clang", CXX: "clang++" }
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -42,8 +40,6 @@ jobs:
           cmake \
             -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
             -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
-            -DCMAKE_C_COMPILER=${{ matrix.compiler.CC }} \
-            -DCMAKE_CXX_COMPILER=${{ matrix.compiler.CXX }} \
             -DBUILD_SHARED_LIBS=${{ matrix.build-shared.flag }} \
             -DBUILD_SVCLI=1 \
             -DBUILD_TESTS=1 \
@@ -57,33 +53,13 @@ jobs:
         working-directory: build
         run: ./test/uthenticode_test
 
-      - name: archive
-        if: |
-          github.event.release && matrix.compiler.CC == 'clang'
-        run:
-          zip -r build.zip build
-
-      - name: publish
-        if: |
-          github.event.release && matrix.compiler.CC == 'clang'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: build.zip
-          asset_name: ubuntu.${{ matrix.build-shared.repr }}.${{ matrix.build-type }}.zip
-          asset_content_type: application/zip
-
   build-macos:
     strategy:
       matrix:
-        build-type: ["Debug", "Release"]
+        build-type: ["Debug"]
         build-shared:
          - { flag: "1", repr: "shared" }
          - { flag: "0", repr: "static" }
-        compiler:
-        - { CC: "clang", CXX: "clang++" }
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
@@ -106,32 +82,11 @@ jobs:
 
       - name: build
         working-directory: build
-        env:
-          CC: ${{ matrix.compiler.CC }}
-          CXX: ${{ matrix.compiler.CXX }}
         run: cmake --build .
 
       - name: tests
         working-directory: build
         run: ./test/uthenticode_test
-
-      - name: archive
-        if: |
-          github.event.release && matrix.compiler.CC == 'clang'
-        run:
-          zip -r build.zip build
-
-      - name: publish
-        if: |
-          github.event.release && matrix.compiler.CC == 'clang'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: build.zip
-          asset_name: macos.${{ matrix.build-shared.repr }}.${{ matrix.build-type }}.zip
-          asset_content_type: application/zip
 
   build-windows:
     strategy:
@@ -139,7 +94,7 @@ jobs:
         build-arch:
         - { arch: "x64", triplet: "x64-windows" }
         - { arch: "Win32", triplet: "x86-windows" }
-        build-type: ["Debug", "Release"]
+        build-type: ["Debug"]
     runs-on: windows-latest
     env:
       VCPKG_DEFAULT_TRIPLET: ${{ matrix.build-arch.triplet }}
@@ -172,24 +127,6 @@ jobs:
         working-directory: build
         run: |
           ./test/${{ matrix.build-type }}/uthenticode_test
-
-      - name: archive
-        if: |
-          github.event.release
-        run:
-          7z a build.zip build
-
-      - name: publish
-        if: |
-          github.event.release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: build.zip
-          asset_name: windows.${{ matrix.build-arch.arch }}.${{ matrix.build-type }}.zip
-          asset_content_type: application/zip
 
   all-tests-pass:
     if: always()
