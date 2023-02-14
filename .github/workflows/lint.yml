@@ -7,11 +7,6 @@ on:
   pull_request:
 
 jobs:
-  # lint-source:
-  #   name: Lint Python
-  #   uses: trailofbits/.github/.github/workflows/lint.yml@ww/clang-format
-  #   with:
-  #     language: c++
   lint:
     runs-on: ubuntu-latest
     steps:
