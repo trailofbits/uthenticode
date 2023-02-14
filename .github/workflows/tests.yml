@@ -25,57 +25,57 @@ jobs:
         - { CC: "clang", CXX: "clang++" }
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Restore from cache and install vcpkg
-      uses: lukka/run-vcpkg@v10
-      with:
-        vcpkgGitCommitId: ${{ env.vcpkg-commit }}
+      - name: Restore from cache and install vcpkg
+        uses: lukka/run-vcpkg@v10
+        with:
+          vcpkgGitCommitId: ${{ env.vcpkg-commit }}
 
-    - name: deps
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y libssl-dev
+      - name: deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential clang ninja
 
-    - name: configure
-      run: |
-        mkdir build && cd build
-        cmake \
-          -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
-          -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
-          -DBUILD_SHARED_LIBS=${{ matrix.build-shared.flag }} \
-          -DBUILD_SVCLI=1 \
-          -DBUILD_TESTS=1 \
-          ..
+      - name: configure
+        run: |
+          mkdir build && cd build
+          cmake \
+            -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
+            -DBUILD_SHARED_LIBS=${{ matrix.build-shared.flag }} \
+            -DBUILD_SVCLI=1 \
+            -DBUILD_TESTS=1 \
+            ..
 
-    - name: build
-      working-directory: build
-      env:
-        CC: ${{ matrix.compiler.CC }}
-        CXX: ${{ matrix.compiler.CXX }}
-      run: cmake --build .
+      - name: build
+        working-directory: build
+        env:
+          CC: ${{ matrix.compiler.CC }}
+          CXX: ${{ matrix.compiler.CXX }}
+        run: cmake --build .
 
-    - name: tests
-      working-directory: build
-      run: ./test/uthenticode_test
+      - name: tests
+        working-directory: build
+        run: ./test/uthenticode_test
 
-    - name: archive
-      if: |
-        github.event.release && matrix.compiler.CC == 'clang'
-      run:
-        zip -r build.zip build
+      - name: archive
+        if: |
+          github.event.release && matrix.compiler.CC == 'clang'
+        run:
+          zip -r build.zip build
 
-    - name: publish
-      if: |
-        github.event.release && matrix.compiler.CC == 'clang'
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: build.zip
-        asset_name: ubuntu.${{ matrix.build-shared.repr }}.${{ matrix.build-type }}.zip
-        asset_content_type: application/zip
+      - name: publish
+        if: |
+          github.event.release && matrix.compiler.CC == 'clang'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: build.zip
+          asset_name: ubuntu.${{ matrix.build-shared.repr }}.${{ matrix.build-type }}.zip
+          asset_content_type: application/zip
 
   build-macos:
     strategy:
@@ -86,7 +86,6 @@ jobs:
          - { flag: "0", repr: "static" }
         compiler:
         - { CC: "clang", CXX: "clang++" }
-        - { CC: "gcc", CXX: "g++" }
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
@@ -147,52 +146,52 @@ jobs:
     env:
       VCPKG_DEFAULT_TRIPLET: ${{ matrix.build-arch.triplet }}
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Restore from cache and install vcpkg
-      uses: lukka/run-vcpkg@v10
-      with:
-        vcpkgGitCommitId: ${{ env.vcpkg-commit }}
+      - name: Restore from cache and install vcpkg
+        uses: lukka/run-vcpkg@v10
+        with:
+          vcpkgGitCommitId: ${{ env.vcpkg-commit }}
 
-    - name: configure
-      shell: bash
-      run: |
-        mkdir build
-        cd build
-        cmake \
-          -G "Visual Studio 17 2022" \
-          -A ${{ matrix.build-arch.arch }} \
-          -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
-          -DBUILD_SVCLI=1 \
-          -DBUILD_TESTS=1 \
-          ..
+      - name: configure
+        shell: bash
+        run: |
+          mkdir build
+          cd build
+          cmake \
+            -G "Visual Studio 17 2022" \
+            -A ${{ matrix.build-arch.arch }} \
+            -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
+            -DBUILD_SVCLI=1 \
+            -DBUILD_TESTS=1 \
+            ..
 
-    - name: build
-      working-directory: build
-      run: cmake --build . --config ${{ matrix.build-type }}
+      - name: build
+        working-directory: build
+        run: cmake --build . --config ${{ matrix.build-type }}
 
-    - name: tests
-      working-directory: build
-      run: |
-        ./test/${{ matrix.build-type }}/uthenticode_test
+      - name: tests
+        working-directory: build
+        run: |
+          ./test/${{ matrix.build-type }}/uthenticode_test
 
-    - name: archive
-      if: |
-        github.event.release
-      run:
-        7z a build.zip build
+      - name: archive
+        if: |
+          github.event.release
+        run:
+          7z a build.zip build
 
-    - name: publish
-      if: |
-        github.event.release
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: build.zip
-        asset_name: windows.${{ matrix.build-arch.arch }}.${{ matrix.build-type }}.zip
-        asset_content_type: application/zip
+      - name: publish
+        if: |
+          github.event.release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: build.zip
+          asset_name: windows.${{ matrix.build-arch.arch }}.${{ matrix.build-type }}.zip
+          asset_content_type: application/zip
 
   all-tests-pass:
     if: always()
