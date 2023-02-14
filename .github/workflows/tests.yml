@@ -22,7 +22,7 @@ jobs:
          - { flag: "0", repr: "static" }
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Restore from cache and install vcpkg
         uses: lukka/run-vcpkg@v10
@@ -62,7 +62,7 @@ jobs:
          - { flag: "0", repr: "static" }
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Restore from cache and install vcpkg
         uses: lukka/run-vcpkg@v10
@@ -99,7 +99,7 @@ jobs:
     env:
       VCPKG_DEFAULT_TRIPLET: ${{ matrix.build-arch.triplet }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Restore from cache and install vcpkg
         uses: lukka/run-vcpkg@v10
