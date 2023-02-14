@@ -1,0 +1,44 @@
+name: Deploy Documentation
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - name: deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y doxygen graphviz
+
+      - name: docs
+        run: make doc
+
+      - name: upload docs artifact
+        uses: actions/upload-pages-artifact@v1.0.7
+        with:
+          path: ./doc/html/
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      # NOTE: Needed to push to the repository.
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v1.2.4
