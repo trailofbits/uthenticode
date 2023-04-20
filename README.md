@@ -42,24 +42,14 @@ unmodified Windows system.
 ## Building
 
 *μthenticode* depends on [pe-parse](https://github.com/trailofbits/pe-parse)
-and OpenSSL 1.1.0.
-
-pe-parse (and OpenSSL, if you don't already have it) can be installed via
-`vcpkg`:
+and OpenSSL 1.1.0, which are installed via `vcpkg` by following these steps:
 
 ```bash
-vcpkg install pe-parse
-```
-
-The rest of the build is standard CMake:
-
-```bash
-mkdir build && cd build
-cmake ..
-cmake --build .
+cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=<vcpkg-path>/scripts/buildsystems/vcpkg.cmake
+cmake --build build
 # the default install prefix is the build directory;
 # use CMAKE_INSTALL_PREFIX to modify it
-cmake --build . --target install
+cmake --build build --target install
 ```
 
 If you have `doxygen` installed, you can build *μthenticode*'s documentation
@@ -83,9 +73,9 @@ The `svcli` utility also provides a small example of using *μthenticode*'s APIs
 You can build it by passing `-DBUILD_SVCLI=1` to `cmake`:
 
 ```bash
-cmake -DBUILD_SVCLI=1 ..
-cmake --build .
-./src/svcli/svcli /path/to/some.exe
+cmake -DBUILD_SVCLI=1 -B build -S . -DCMAKE_TOOLCHAIN_FILE=<vcpkg-path>/scripts/buildsystems/vcpkg.cmake
+cmake --build build
+./build/src/svcli/svcli /path/to/some.exe
 ```
 
 ## Resources
