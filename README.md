@@ -42,7 +42,7 @@ unmodified Windows system.
 ## Building
 
 *μthenticode* depends on [pe-parse](https://github.com/trailofbits/pe-parse)
-and OpenSSL 1.1.0, which are installed via `vcpkg` by following these steps:
+and OpenSSL 3.0 or higher, which are installed via `vcpkg` by following these steps:
 
 ```bash
 cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=<vcpkg-path>/scripts/buildsystems/vcpkg.cmake
