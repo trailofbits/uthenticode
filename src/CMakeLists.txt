@@ -4,7 +4,7 @@ project(uthenticode)
 
 find_package(pe-parse REQUIRED)
 find_package(
-  OpenSSL 1.1
+  OpenSSL 3.0
   COMPONENTS Crypto
   REQUIRED
 )
