@@ -25,7 +25,7 @@ jobs:
         run: make doc
 
       - name: upload docs artifact
-        uses: actions/upload-pages-artifact@v1.0.7
+        uses: actions/upload-pages-artifact@v1.0.8
         with:
           path: ./doc/html/
 
