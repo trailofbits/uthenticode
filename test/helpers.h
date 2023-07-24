@@ -95,3 +95,19 @@ class AuthNest32PlusTest : public ::testing::Test {
 
   peparse::parsed_pe *pe{nullptr};
 };
+
+class MissingEKUTest : public ::testing::Test {
+ protected:
+  void SetUp() override {
+    auto *file = UTHENTICODE_TEST_ASSETS "/A_SSLippery_Slope.exe";
+
+    pe = peparse::ParsePEFromFile(file);
+    ASSERT_TRUE(pe != nullptr);
+  }
+
+  void TearDown() override {
+    peparse::DestructParsedPE(pe);
+  }
+
+  peparse::parsed_pe *pe{nullptr};
+};

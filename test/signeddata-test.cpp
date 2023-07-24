@@ -116,3 +116,10 @@ TEST_F(AuthNest32PlusTest, SignedData_properties_nested) {
   ASSERT_STRCASEEQ(checksumstr.c_str(),
                    "ddc5b39c4292120745eb86a67eaa331032cc05a0dafaf6e28ec9aa0f189c408d");
 }
+
+TEST_F(MissingEKUTest, SignedData_missing_codesigning_EKU) {
+  auto certs = uthenticode::read_certs(pe);
+  auto signed_data = certs[0].as_signed_data();
+
+  ASSERT_FALSE(signed_data->verify_signature());
+}
