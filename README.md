@@ -6,7 +6,7 @@
 partially verifying [Authenticode](https://docs.microsoft.com/en-us/windows-hardware/drivers/install/authenticode)
 digital signatures.
 
-> **Warning**
+> [!WARNING]\
 > This is not a full implementation of Authenticode; you **must not** use it in a way that assumes
 > that its results are equivalent to verification on a Windows machine. See the [caveats](#caveats)
 > below for more details.
