@@ -3,8 +3,13 @@
 [![Tests](https://github.com/trailofbits/uthenticode/actions/workflows/tests.yml/badge.svg)](https://github.com/trailofbits/uthenticode/actions/workflows/tests.yml)
 
 *uthenticode* (stylized as *μthenticode*) is a small cross-platform library for
-verifying [Authenticode](https://docs.microsoft.com/en-us/windows-hardware/drivers/install/authenticode)
+partially verifying [Authenticode](https://docs.microsoft.com/en-us/windows-hardware/drivers/install/authenticode)
 digital signatures.
+
+> **Warning**
+> This is not a full implementation of Authenticode; you **must not** use it in a way that assumes
+> that its results are equivalent to verification on a Windows machine. See the [caveats](#caveats)
+> below for more details.
 
 [Read our blog post on verifying Windows binaries without Windows!](https://blog.trailofbits.com/2020/05/27/verifying-windows-binaries-without-windows/)
 
@@ -35,9 +40,11 @@ Other available solutions are deficient:
 **cannot** perform full-chain verifications of Authenticode signatures, as it
 lacks access to the Trusted Publishers store.
 
-You should use *μthenticode* to verify the embedded chain. You should **not**
-assume that a "verified" binary from *μthenticode*'s perspective will run on an
-unmodified Windows system.
+You can use *μthenticode* to cryptographically verify the embedded chain.
+You **must not** assume that a "verified" binary from *μthenticode*'s
+perspective will run on an unmodified Windows system. We make no claim that
+*μthenticode*'s implementation of the Authenticode certificate policy is
+complete.
 
 ## Building
 
