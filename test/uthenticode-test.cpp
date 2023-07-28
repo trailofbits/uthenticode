@@ -79,16 +79,16 @@ TEST_F(NoAuthTest, calculate_checksum) {
 
   auto md5 = uthenticode::calculate_checksum(pe, uthenticode::checksum_kind::MD5);
   EXPECT_EQ(md5.size(), 32);
-  EXPECT_STRCASEEQ(md5.c_str(), "A31557B1E39554C88C69AAE1DFAAF314");
+  EXPECT_STRCASEEQ(md5.c_str(), "6f7ac8c17504fad04fba2a552a122e07");
 
   auto sha1 = uthenticode::calculate_checksum(pe, uthenticode::checksum_kind::SHA1);
   EXPECT_EQ(sha1.size(), 40);
-  EXPECT_STRCASEEQ(sha1.c_str(), "2B316F0552972605D509321F31F4274533C93161");
+  EXPECT_STRCASEEQ(sha1.c_str(), "4ba40c91418e28cb630b97cfde1cff0905a91139");
 
   auto sha256 = uthenticode::calculate_checksum(pe, uthenticode::checksum_kind::SHA256);
   EXPECT_EQ(sha256.size(), 64);
   EXPECT_STRCASEEQ(sha256.c_str(),
-                   "6B7FA3E8298F33BC47F4ABB9C845930B1EACC0DAD96503CFA52D4EA18DDC89F0");
+                   "e260f8a57faa823453bd95525068780fcbfb0332003d9b606cb9a27e605a8d7b");
 }
 
 TEST_F(Auth32Test, calculate_checksum) {

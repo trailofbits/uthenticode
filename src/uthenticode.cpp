@@ -476,6 +476,13 @@ std::string calculate_checksum(peparse::parsed_pe *pe, checksum_kind kind) {
     return {};
   }
 
+  /* We'll stash the bits of the PE that we need to hash in this buffer.
+   * Reserve the original PE's size upfront, since we expect the hashed data
+   * to be only slightly smaller.
+   */
+  std::vector<std::uint8_t> pe_bits;
+  pe_bits.reserve(pe->fileBuffer->bufLen);
+
   /* In both PEs and PE32+s, the PE checksum is 64 bytes into the optional header,
    * which itself is 24 bytes after the PE magic and COFF header from the offset
    * specified in the DOS header.
@@ -519,13 +526,48 @@ std::string calculate_checksum(peparse::parsed_pe *pe, checksum_kind kind) {
     return {};
   }
 
-  /* We'll stash the bits of the PE that we need to hash in this buffer.
-   */
-  std::vector<std::uint8_t> pe_bits;
-  pe_bits.reserve(size_of_headers);
-
   pe_bits.insert(pe_bits.begin(), header_buf->buf, header_buf->buf + header_buf->bufLen);
   delete header_buf;
+
+  /* Erase the PE checksum and certificate table entry from pe_bits.
+   * Do the certificate table entry first, so that we don't have to rescale the checksum's offset.
+   */
+  pe_bits.erase(pe_bits.begin() + cert_table_offset, pe_bits.begin() + cert_table_offset + 8);
+  pe_bits.erase(pe_bits.begin() + pe_checksum_offset, pe_bits.begin() + pe_checksum_offset + 4);
+
+  /* Build up the list of sections in the PE, in ascending order by PointerToRawData
+   * (i.e., by file offset).
+   *
+   * NOTE(ww): Ideally we'd use a capture with the C++ lambda here, but C++ lambdas can't be
+   * used within C callbacks unless they're captureless.
+   */
+  impl::SectionList sections;
+  peparse::IterSec(
+      pe,
+      [](void *cbd,
+         [[maybe_unused]] const peparse::VA &secBase,
+         [[maybe_unused]] const std::string &sectionName,
+         [[maybe_unused]] const peparse::image_section_header &sec,
+         const peparse::bounded_buffer *b) -> int {
+        auto &sections = *static_cast<impl::SectionList *>(cbd);
+        sections.emplace_back(b);
+        return 0;
+      },
+      &sections);
+
+  /* Copy each section's data into pe_bits, in ascending order.
+   */
+  for (const auto &section : sections) {
+    pe_bits.insert(pe_bits.end(), section->buf, section->buf + section->bufLen);
+  }
+
+  /* Also copy any data that happens to be trailing the certificate table into pe_bits.
+   * Most PEs won't have any trailing data but the Authenticode specification is explicit about
+   * hashing any if it exists.
+   */
+  pe_bits.insert(pe_bits.end(),
+                 pe->fileBuffer->buf + security_dir.VirtualAddress + security_dir.Size,
+                 pe->fileBuffer->buf + pe->fileBuffer->bufLen);
 
   /* This won't happen under normal conditions, but could with a tampered input.
    * We don't have to check pe_checksum_offset here since it'll always be strictly less
@@ -535,42 +577,19 @@ std::string calculate_checksum(peparse::parsed_pe *pe, checksum_kind kind) {
     return {};
   }
 
-  /* Erase the PE checksum and certificate table entry from pe_bits.
-   * Do the certificate table entry first, so that we don't have to rescale the checksum's offset.
-   */
-  pe_bits.erase(pe_bits.begin() + cert_table_offset, pe_bits.begin() + cert_table_offset + 8);
-  pe_bits.erase(pe_bits.begin() + pe_checksum_offset, pe_bits.begin() + pe_checksum_offset + 4);
-
-  /* Hash pe_bits, which contains the rest of the header.
-   */
-  const auto *md = EVP_get_digestbynid(nid);
-  auto *md_ctx = EVP_MD_CTX_new();
-  EVP_DigestInit(md_ctx, md);
-  EVP_DigestUpdate(md_ctx, pe_bits.data(), pe_bits.size());
-
-  if (security_dir.VirtualAddress > 0) {
-    /* If a certificate table exists, hash everything before and after it.
-     */
-    EVP_DigestUpdate(md_ctx,
-                     pe->fileBuffer->buf + size_of_headers,
-                     security_dir.VirtualAddress - size_of_headers);
-
-    /* Most PEs won't have any trailing data but the Authenticode specification is explicit about
-     * hashing any if it exists.
-     */
-    EVP_DigestUpdate(md_ctx,
-                     pe->fileBuffer->buf + security_dir.VirtualAddress + security_dir.Size,
-                     pe->fileBuffer->bufLen - (security_dir.VirtualAddress + security_dir.Size));
-  } else {
-    /* If there's no certificate table, just hash the rest of the file.
-     */
-    EVP_DigestUpdate(
-        md_ctx, pe->fileBuffer->buf + size_of_headers, pe->fileBuffer->bufLen - size_of_headers);
-  }
-
-  /* Finally, finish hashing the damn thing.
+  /* Finally, hash the damn thing.
+   *
+   * NOTE(ww): Instead of building up pe_bits and hashing it in one pass, we
+   * could hash it incrementally with each section. This would also solve
+   * the capture problem with the C++ callback above and would reduce
+   * the number of needed allocations.
    */
   std::array<std::uint8_t, EVP_MAX_MD_SIZE> md_buf;
+  const auto *md = EVP_get_digestbynid(nid);
+  auto *md_ctx = EVP_MD_CTX_new();
+
+  EVP_DigestInit(md_ctx, md);
+  EVP_DigestUpdate(md_ctx, pe_bits.data(), pe_bits.size());
   EVP_DigestFinal(md_ctx, md_buf.data(), nullptr);
   EVP_MD_CTX_free(md_ctx);
 
