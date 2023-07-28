@@ -3,6 +3,7 @@
 #include <openssl/crypto.h>
 #include <openssl/err.h>
 #include <openssl/x509.h>
+#include <openssl/x509v3.h>
 
 #include <algorithm>
 #include <array>
@@ -207,6 +208,32 @@ bool SignedData::verify_signature() const {
 
   if (certs == nullptr) {
     return false;
+  }
+
+  auto *signers_stack_ptr = PKCS7_get0_signers(p7_, nullptr, 0);
+  if (signers_stack_ptr == nullptr) {
+    return false;
+  }
+  auto signers_stack = impl::STACK_OF_X509_ptr(signers_stack_ptr, impl::SK_X509_free);
+
+  /* NOTE(ww): Authenticode specification, page 13: the signer must have the
+   * codeSigning EKU, **or** no member of the signer's chain may have it.
+   *
+   * The check below is more strict than that: **every** signer must have
+   * the codeSigning EKU, and we don't check the embedded chain (since
+   * we can't do full chain verification anyways).
+   */
+  for (auto i = 0; i < sk_X509_num(signers_stack.get()); ++i) {
+    auto *signer = sk_X509_value(signers_stack.get(), i);
+
+    /* NOTE(ww): Ths should really be X509_check_purpose with
+     * X509_PURPOSE_CODE_SIGN, but this is inexplicably not present
+     * in even the latest releases of OpenSSL as of 2023-05.
+     */
+    auto xku_flags = X509_get_extended_key_usage(signer);
+    if (!(xku_flags & XKU_CODE_SIGN)) {
+      return false;
+    }
   }
 
   /* NOTE(ww): What happens below is a bit dumb: we convert our SpcIndirectDataContent back
