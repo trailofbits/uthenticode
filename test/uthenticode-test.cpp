@@ -167,3 +167,11 @@ TEST_F(Auth32DupeTest, verify) {
 TEST_F(Auth32PlusTest, verify) {
   EXPECT_TRUE(uthenticode::verify(pe));
 }
+
+TEST_F(MissingEKUTest, verify) {
+  EXPECT_FALSE(uthenticode::verify(pe));
+}
+
+TEST_F(StuffingTest, verify) {
+  EXPECT_FALSE(uthenticode::verify(pe));
+}

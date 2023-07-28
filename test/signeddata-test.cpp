@@ -123,3 +123,13 @@ TEST_F(MissingEKUTest, SignedData_missing_codesigning_EKU) {
 
   ASSERT_FALSE(signed_data->verify_signature());
 }
+
+TEST_F(StuffingTest, SignedData_missing_codesigning_EKU) {
+  auto certs = uthenticode::read_certs(pe);
+  auto signed_data = certs[0].as_signed_data();
+
+  // The signature in this PE is valid, but it doesn't actually
+  // match the PE's calculated checksum. See `StuffingTest.verify`
+  // for the corresponding test.
+  ASSERT_TRUE(signed_data->verify_signature());
+}
