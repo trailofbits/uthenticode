@@ -53,7 +53,12 @@ int main(int argc, char const *argv[]) {
   std::array<checksum_kind, 3> kinds = {
       checksum_kind::MD5, checksum_kind::SHA1, checksum_kind::SHA256};
   for (const auto &kind : kinds) {
-    std::cout << std::setw(6) << kind << ": " << uthenticode::calculate_checksum(pe, kind) << '\n';
+    auto cksum = uthenticode::calculate_checksum(pe, kind);
+    if (cksum.has_value()) {
+      std::cout << std::setw(6) << kind << ": " << cksum.value() << '\n';
+    } else {
+      std::cout << std::setw(6) << kind << ": NONE (not signed)\n";
+    }
   }
   std::cout << '\n';
 

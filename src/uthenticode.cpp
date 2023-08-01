@@ -470,7 +470,7 @@ std::vector<Checksum> get_checksums(peparse::parsed_pe *pe) {
   return checksums;
 }
 
-std::string calculate_checksum(peparse::parsed_pe *pe, checksum_kind kind) {
+std::optional<std::string> calculate_checksum(peparse::parsed_pe *pe, checksum_kind kind) {
   auto nid = checksum_type_to_nid(kind);
   if (nid == NID_undef) {
     return {};
@@ -509,6 +509,14 @@ std::string calculate_checksum(peparse::parsed_pe *pe, checksum_kind kind) {
     return {};
   }
 
+  /* We explicitly don't support hashing files that don't contain a security
+   * directory; not because we *can't*, but because doing so isn't well defined
+   * in the Authenticode specification.
+   */
+  if (security_dir.VirtualAddress == 0) {
+    return {};
+  }
+
   /* "VirtualAddress" here is really an offset; an invalid one indicates a tampered input.
    * Similarly, a cert_table_offset beyond size_of_headers indicates a tampered input
    * (we get the pe_checksum_offset check for free, since it's always smaller).
@@ -528,6 +536,14 @@ std::string calculate_checksum(peparse::parsed_pe *pe, checksum_kind kind) {
 
   pe_bits.insert(pe_bits.begin(), header_buf->buf, header_buf->buf + header_buf->bufLen);
   delete header_buf;
+
+  /* This won't happen under normal conditions, but could with a tampered input.
+   * We don't have to check pe_checksum_offset here since it'll always be strictly less
+   * than cert_table_offset.
+   */
+  if (pe_bits.size() <= cert_table_offset + 8) {
+    return {};
+  }
 
   /* Erase the PE checksum and certificate table entry from pe_bits.
    * Do the certificate table entry first, so that we don't have to rescale the checksum's offset.
@@ -568,14 +584,6 @@ std::string calculate_checksum(peparse::parsed_pe *pe, checksum_kind kind) {
   pe_bits.insert(pe_bits.end(),
                  pe->fileBuffer->buf + security_dir.VirtualAddress + security_dir.Size,
                  pe->fileBuffer->buf + pe->fileBuffer->bufLen);
-
-  /* This won't happen under normal conditions, but could with a tampered input.
-   * We don't have to check pe_checksum_offset here since it'll always be strictly less
-   * than cert_table_offset.
-   */
-  if (pe_bits.size() <= cert_table_offset + 8) {
-    return {};
-  }
 
   /* Finally, hash the damn thing.
    *
