@@ -598,6 +598,7 @@ std::optional<std::string> calculate_checksum(peparse::parsed_pe *pe, checksum_k
     return {};
   }
   pe_bits.insert(pe_bits.end(), trailer_buf->buf, trailer_buf->buf + trailer_buf->bufLen);
+  delete trailer_buf;
 
   /* Finally, hash the damn thing.
    *
