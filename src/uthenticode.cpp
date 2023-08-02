@@ -557,7 +557,15 @@ std::optional<std::string> calculate_checksum(peparse::parsed_pe *pe, checksum_k
    * NOTE(ww): Ideally we'd use a capture with the C++ lambda here, but C++ lambdas can't be
    * used within C callbacks unless they're captureless.
    */
+  struct iter_sec_ctx {
+    impl::SectionList sections;
+    uint32_t total_bytes_hashed;
+  };
   impl::SectionList sections;
+  uint32_t total_bytes_hashed = size_of_headers;
+
+  iter_sec_ctx ctx = {sections, total_bytes_hashed};
+
   peparse::IterSec(
       pe,
       [](void *cbd,
@@ -565,11 +573,12 @@ std::optional<std::string> calculate_checksum(peparse::parsed_pe *pe, checksum_k
          [[maybe_unused]] const std::string &sectionName,
          [[maybe_unused]] const peparse::image_section_header &sec,
          const peparse::bounded_buffer *b) -> int {
-        auto &sections = *static_cast<impl::SectionList *>(cbd);
-        sections.emplace_back(b);
+        auto &ctx = *static_cast<iter_sec_ctx *>(cbd);
+        ctx.sections.emplace_back(b);
+        ctx.total_bytes_hashed += sec.SizeOfRawData;
         return 0;
       },
-      &sections);
+      &ctx);
 
   /* Copy each section's data into pe_bits, in ascending order.
    */
@@ -577,13 +586,25 @@ std::optional<std::string> calculate_checksum(peparse::parsed_pe *pe, checksum_k
     pe_bits.insert(pe_bits.end(), section->buf, section->buf + section->bufLen);
   }
 
-  /* Also copy any data that happens to be trailing the certificate table into pe_bits.
-   * Most PEs won't have any trailing data but the Authenticode specification is explicit about
-   * hashing any if it exists.
-   */
-  pe_bits.insert(pe_bits.end(),
-                 pe->fileBuffer->buf + security_dir.VirtualAddress + security_dir.Size,
-                 pe->fileBuffer->buf + pe->fileBuffer->bufLen);
+  auto file_size = pe->fileBuffer->bufLen;
+  if (total_bytes_hashed > file_size) {
+    /* Tampered input.
+     */
+    return {};
+  } else if (total_bytes_hashed < file_size) {
+    auto extra_data_size = file_size - (security_dir.Size + total_bytes_hashed);
+    if (total_bytes_hashed + extra_data_size >= pe->fileBuffer->bufLen) {
+      return {};
+    }
+
+    /* Also copy any data that happens to be trailing the certificate table into pe_bits.
+     * Most PEs won't have any trailing data but the Authenticode specification is explicit about
+     * hashing any if it exists.
+     */
+    pe_bits.insert(pe_bits.end(),
+                   pe->fileBuffer->buf + total_bytes_hashed,
+                   pe->fileBuffer->buf + total_bytes_hashed + extra_data_size);
+  }
 
   /* Finally, hash the damn thing.
    *
