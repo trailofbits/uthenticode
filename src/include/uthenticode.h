@@ -286,11 +286,14 @@ std::vector<Checksum> get_checksums(peparse::parsed_pe *pe);
 /**
  * Calculates the requested message digest for the given `parsed_pe`.
  *
+ * `parsed_pe` must contain a security directory; calculating the checksum
+ * of a "bare" PE is not supported.
+ *
  * @param  pe   the `peparse::parsed_pe` to hash
  * @param  kind the kind of message digest to calculate
- * @return      the resulting digest, or an empty string on failure
+ * @return      the resulting digest, or `std::nullopt` on failure
  */
-std::string calculate_checksum(peparse::parsed_pe *pe, checksum_kind kind);
+std::optional<std::string> calculate_checksum(peparse::parsed_pe *pe, checksum_kind kind);
 
 /**
  * Verifies the given `parsed_pe`.
