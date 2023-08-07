@@ -10,7 +10,7 @@ on:
   pull_request:
 
 env:
-  vcpkg-commit: 93895b28ea7bc8cda10f156c5d336f3fc070f8b1
+  vcpkg-commit: 9d47b24eacbd1cd94f139457ef6cd35e5d92cc84
 
 jobs:
   build-linux:
