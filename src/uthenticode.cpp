@@ -219,10 +219,11 @@ bool SignedData::verify_signature() const {
   /* NOTE(ww): Authenticode specification, page 13: the signer must have the
    * codeSigning EKU, **or** no member of the signer's chain may have it.
    *
-   * The check below is more strict than that: **every** signer must have
-   * the codeSigning EKU, and we don't check the embedded chain (since
-   * we can't do full chain verification anyways).
+   * The check below is more strict than that: **every** signer and embedded
+   * intermediate cert must have the codeSigning EKU.
    */
+
+  /* Check all signing certificates. */
   for (auto i = 0; i < sk_X509_num(signers_stack.get()); ++i) {
     auto *signer = sk_X509_value(signers_stack.get(), i);
 
@@ -231,6 +232,16 @@ bool SignedData::verify_signature() const {
      * in even the latest releases of OpenSSL as of 2023-05.
      */
     auto xku_flags = X509_get_extended_key_usage(signer);
+    if (!(xku_flags & XKU_CODE_SIGN)) {
+      return false;
+    }
+  }
+
+  /* Check all embedded intermediates. */
+  for (auto i = 0; i < sk_X509_num(certs); ++i) {
+    auto *cert = sk_X509_value(certs, i);
+
+    auto xku_flags = X509_get_extended_key_usage(cert);
     if (!(xku_flags & XKU_CODE_SIGN)) {
       return false;
     }
