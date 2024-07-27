@@ -242,7 +242,7 @@ bool SignedData::verify_signature() const {
     auto *cert = sk_X509_value(certs, i);
 
     auto xku_flags = X509_get_extended_key_usage(cert);
-    if (!(xku_flags & XKU_CODE_SIGN)) {
+    if (!(xku_flags & (XKU_CODE_SIGN | XKU_TIMESTAMP))) {
       return false;
     }
   }
