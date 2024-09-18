@@ -212,6 +212,11 @@ class SignedData {
    */
   std::optional<SignedData> get_nested_signed_data() const;
 
+  /**
+   * @return a const-reference to the certificate buffer.
+   */
+  std::vector<std::uint8_t> const &get_raw_data() const;
+
  private:
   impl::Authenticode_SpcIndirectDataContent *get_indirect_data() const;
 
