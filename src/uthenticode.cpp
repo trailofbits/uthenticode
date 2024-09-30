@@ -81,7 +81,7 @@ static inline std::string tohex(std::uint8_t *buf, std::size_t len) {
   std::string hexstr;
   hexstr.reserve(len * 2);  // each byte creates two hex digits
 
-  for (auto i = 0; i < len; i++) {
+  for (std::size_t i = 0; i < len; i++) {
     hexstr += lookup_table[buf[i] >> 4];
     hexstr += lookup_table[buf[i] & 0xF];
   }
@@ -362,6 +362,10 @@ std::optional<SignedData> SignedData::get_nested_signed_data() const {
   return std::make_optional<SignedData>(cert_buf);
 }
 
+std::vector<std::uint8_t> const &SignedData::get_raw_data() const {
+  return cert_buf_;
+}
+
 impl::Authenticode_SpcIndirectDataContent *SignedData::get_indirect_data() const {
   auto *contents = p7_->d.sign->contents;
   if (contents == nullptr) {
@@ -410,7 +414,7 @@ std::optional<SignedData> WinCert::as_signed_data() const {
 
   try {
     return std::make_optional<SignedData>(cert_buf_);
-  } catch (FormatError) {
+  } catch (FormatError &) {
     return std::nullopt;
   }
 }
