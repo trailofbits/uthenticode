@@ -140,16 +140,26 @@ std::ostream &operator<<(std::ostream &os, checksum_kind kind) {
   }
 }
 
+static inline bool name_to_string(std::string &strname, X509_NAME *name, unsigned long flags) {
+  std::unique_ptr<BIO, decltype(&BIO_free)> name_bio(BIO_new(BIO_s_mem()), BIO_free);
+  if (-1 != X509_NAME_print_ex(name_bio.get(), name, 0, (flags) & ~(ASN1_STRFLGS_ESC_MSB))) {
+    char *data = nullptr;
+    auto len = BIO_get_mem_data(name_bio.get(), &data);
+    if (data && len) {
+      strname = std::string(data, len);
+      return true;
+    }
+  }
+  return false;
+}
+
 Certificate::Certificate(X509 *cert) {
-  auto subject = impl::OpenSSL_ptr(X509_NAME_oneline(X509_get_subject_name(cert), nullptr, 0),
-                                   impl::OpenSSL_free);
-  auto issuer = impl::OpenSSL_ptr(X509_NAME_oneline(X509_get_issuer_name(cert), nullptr, 0),
-                                  impl::OpenSSL_free);
+  constexpr auto xn_flags = default_xn_flags;
+  std::ignore = name_to_string(issuer_, X509_get_issuer_name(cert), xn_flags);
+  std::ignore = name_to_string(subject_, X509_get_subject_name(cert), xn_flags);
   auto serial_bn = impl::BN_ptr(ASN1_INTEGER_to_BN(X509_get_serialNumber(cert), nullptr), BN_free);
   auto serial_number = impl::OpenSSL_ptr(BN_bn2hex(serial_bn.get()), impl::OpenSSL_free);
 
-  subject_ = std::string(subject.get());
-  issuer_ = std::string(issuer.get());
   serial_number_ = std::string(serial_number.get());
 }
 
