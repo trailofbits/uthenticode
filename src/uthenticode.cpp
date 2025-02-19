@@ -581,9 +581,9 @@ std::optional<std::string> calculate_checksum(peparse::parsed_pe *pe, checksum_k
     uint32_t total_bytes_hashed;
   };
 
-  impl::SectionList sections;
-  uint32_t total_bytes_hashed = size_of_headers;
-  iter_sec_ctx ctx = {sections, total_bytes_hashed};
+  iter_sec_ctx ctx = {};
+  ctx.total_bytes_hashed = size_of_headers;
+
 
   /* Build up the list of sections in the PE, in ascending order by PointerToRawData
    * (i.e., by file offset).
@@ -605,9 +605,11 @@ std::optional<std::string> calculate_checksum(peparse::parsed_pe *pe, checksum_k
       },
       &ctx);
 
+  uint32_t total_bytes_hashed = ctx.total_bytes_hashed;
+
   /* Copy each section's data into pe_bits, in ascending order.
    */
-  for (const auto &section : sections) {
+  for (const auto &section : ctx.sections) {
     pe_bits.insert(pe_bits.end(), section->buf, section->buf + section->bufLen);
   }
 
