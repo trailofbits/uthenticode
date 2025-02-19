@@ -21,6 +21,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: lukka/get-cmake@latest
+
       - name: Restore from cache and install vcpkg
         uses: lukka/run-vcpkg@v11
 
@@ -58,6 +60,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: lukka/get-cmake@latest
+
       - name: Restore from cache and install vcpkg
         uses: lukka/run-vcpkg@v11
 
@@ -91,6 +95,8 @@ jobs:
       VCPKG_DEFAULT_TRIPLET: ${{ matrix.build-arch.triplet }}
     steps:
       - uses: actions/checkout@v4
+
+      - uses: lukka/get-cmake@latest
 
       - name: Restore from cache and install vcpkg
         uses: lukka/run-vcpkg@v11
