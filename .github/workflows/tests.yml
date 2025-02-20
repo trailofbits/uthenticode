@@ -9,9 +9,6 @@ on:
       - master
   pull_request:
 
-env:
-  vcpkg-commit: 9d47b24eacbd1cd94f139457ef6cd35e5d92cc84
-
 jobs:
   build-linux:
     strategy:
@@ -24,10 +21,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: lukka/get-cmake@latest
+
       - name: Restore from cache and install vcpkg
         uses: lukka/run-vcpkg@v11
-        with:
-          vcpkgGitCommitId: ${{ env.vcpkg-commit }}
 
       - name: deps
         run: |
@@ -36,18 +33,17 @@ jobs:
 
       - name: configure
         run: |
-          mkdir build && cd build
           cmake \
-            -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
+            -B build \
+            -S . \
+            --preset default \
             -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
             -DBUILD_SHARED_LIBS=${{ matrix.build-shared.flag }} \
             -DBUILD_SVCLI=1 \
-            -DBUILD_TESTS=1 \
-            ..
+            -DBUILD_TESTS=1
 
       - name: build
-        working-directory: build
-        run: cmake --build .
+        run: cmake --build build
 
       - name: tests
         working-directory: build
@@ -64,25 +60,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: lukka/get-cmake@latest
+
       - name: Restore from cache and install vcpkg
         uses: lukka/run-vcpkg@v11
-        with:
-          vcpkgGitCommitId: ${{ env.vcpkg-commit }}
 
       - name: configure
         run: |
-          mkdir build && cd build
           cmake \
-            -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
+            -B build \
+            -S . \
+            --preset default \
             -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
             -DBUILD_SHARED_LIBS=${{ matrix.build-shared.flag }} \
             -DBUILD_SVCLI=1 \
-            -DBUILD_TESTS=1 \
-            ..
+            -DBUILD_TESTS=1
 
       - name: build
-        working-directory: build
-        run: cmake --build .
+        run: cmake --build build
 
       - name: tests
         working-directory: build
@@ -101,27 +96,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: lukka/get-cmake@latest
+
       - name: Restore from cache and install vcpkg
         uses: lukka/run-vcpkg@v11
-        with:
-          vcpkgGitCommitId: ${{ env.vcpkg-commit }}
 
       - name: configure
         shell: bash
         run: |
-          mkdir build
-          cd build
           cmake \
             -G "Visual Studio 17 2022" \
             -A ${{ matrix.build-arch.arch }} \
-            -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
+            -B build \
+            -S . \
+            --preset default \
             -DBUILD_SVCLI=1 \
             -DBUILD_TESTS=1 \
             ..
 
       - name: build
-        working-directory: build
-        run: cmake --build . --config ${{ matrix.build-type }}
+        run: cmake --build build --config ${{ matrix.build-type }}
 
       - name: tests
         working-directory: build
