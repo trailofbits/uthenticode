@@ -584,7 +584,6 @@ std::optional<std::string> calculate_checksum(peparse::parsed_pe *pe, checksum_k
   iter_sec_ctx ctx = {};
   ctx.total_bytes_hashed = size_of_headers;
 
-
   /* Build up the list of sections in the PE, in ascending order by PointerToRawData
    * (i.e., by file offset).
    *
