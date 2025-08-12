@@ -19,7 +19,7 @@ jobs:
          - { flag: "0", repr: "static" }
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: lukka/get-cmake@latest
 
@@ -58,7 +58,7 @@ jobs:
          - { flag: "0", repr: "static" }
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: lukka/get-cmake@latest
 
@@ -94,7 +94,7 @@ jobs:
     env:
       VCPKG_DEFAULT_TRIPLET: ${{ matrix.build-arch.triplet }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: lukka/get-cmake@latest
 
