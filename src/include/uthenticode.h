@@ -156,8 +156,17 @@ class Certificate {
   /* TODO: Maybe add data_ and get_data(), with data_ populated from i2d_X509.
    */
 
+#ifndef UTHENTICODE_DEFAULT_XN_FLAGS
+  static constexpr unsigned long const default_xn_flags =
+      XN_FLAG_RFC2253 | ASN1_STRFLGS_UTF8_CONVERT;
+#else
+  static constexpr unsigned long const default_xn_flags = (UTHENTICODE_DEFAULT_XN_FLAGS);
+#endif
+  static_assert((default_xn_flags & XN_FLAG_COMPAT) == 0,
+                "Logic is incompatible with XN_FLAG_COMPAT");
+
  private:
-  Certificate(X509 *cert);
+  explicit Certificate(X509 *cert);
   std::string subject_;
   std::string issuer_;
   std::string serial_number_;
@@ -211,6 +220,11 @@ class SignedData {
    * or `std::nullopt` if this SignedData has no nested signature.
    */
   std::optional<SignedData> get_nested_signed_data() const;
+
+  /**
+   * @return a const-reference to the certificate buffer.
+   */
+  std::vector<std::uint8_t> const &get_raw_data() const;
 
  private:
   impl::Authenticode_SpcIndirectDataContent *get_indirect_data() const;

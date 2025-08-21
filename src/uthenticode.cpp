@@ -81,7 +81,7 @@ static inline std::string tohex(std::uint8_t *buf, std::size_t len) {
   std::string hexstr;
   hexstr.reserve(len * 2);  // each byte creates two hex digits
 
-  for (auto i = 0; i < len; i++) {
+  for (std::size_t i = 0; i < len; i++) {
     hexstr += lookup_table[buf[i] >> 4];
     hexstr += lookup_table[buf[i] & 0xF];
   }
@@ -140,16 +140,26 @@ std::ostream &operator<<(std::ostream &os, checksum_kind kind) {
   }
 }
 
+static inline bool name_to_string(std::string &strname, X509_NAME *name, unsigned long flags) {
+  std::unique_ptr<BIO, decltype(&BIO_free)> name_bio(BIO_new(BIO_s_mem()), BIO_free);
+  if (-1 != X509_NAME_print_ex(name_bio.get(), name, 0, (flags) & ~(ASN1_STRFLGS_ESC_MSB))) {
+    char *data = nullptr;
+    auto len = BIO_get_mem_data(name_bio.get(), &data);
+    if (data && len) {
+      strname = std::string(data, len);
+      return true;
+    }
+  }
+  return false;
+}
+
 Certificate::Certificate(X509 *cert) {
-  auto subject = impl::OpenSSL_ptr(X509_NAME_oneline(X509_get_subject_name(cert), nullptr, 0),
-                                   impl::OpenSSL_free);
-  auto issuer = impl::OpenSSL_ptr(X509_NAME_oneline(X509_get_issuer_name(cert), nullptr, 0),
-                                  impl::OpenSSL_free);
+  constexpr auto xn_flags = default_xn_flags;
+  std::ignore = name_to_string(issuer_, X509_get_issuer_name(cert), xn_flags);
+  std::ignore = name_to_string(subject_, X509_get_subject_name(cert), xn_flags);
   auto serial_bn = impl::BN_ptr(ASN1_INTEGER_to_BN(X509_get_serialNumber(cert), nullptr), BN_free);
   auto serial_number = impl::OpenSSL_ptr(BN_bn2hex(serial_bn.get()), impl::OpenSSL_free);
 
-  subject_ = std::string(subject.get());
-  issuer_ = std::string(issuer.get());
   serial_number_ = std::string(serial_number.get());
 }
 
@@ -362,6 +372,10 @@ std::optional<SignedData> SignedData::get_nested_signed_data() const {
   return std::make_optional<SignedData>(cert_buf);
 }
 
+std::vector<std::uint8_t> const &SignedData::get_raw_data() const {
+  return cert_buf_;
+}
+
 impl::Authenticode_SpcIndirectDataContent *SignedData::get_indirect_data() const {
   auto *contents = p7_->d.sign->contents;
   if (contents == nullptr) {
@@ -410,7 +424,7 @@ std::optional<SignedData> WinCert::as_signed_data() const {
 
   try {
     return std::make_optional<SignedData>(cert_buf_);
-  } catch (FormatError) {
+  } catch (FormatError &) {
     return std::nullopt;
   }
 }
@@ -567,9 +581,8 @@ std::optional<std::string> calculate_checksum(peparse::parsed_pe *pe, checksum_k
     uint32_t total_bytes_hashed;
   };
 
-  impl::SectionList sections;
-  uint32_t total_bytes_hashed = size_of_headers;
-  iter_sec_ctx ctx = {sections, total_bytes_hashed};
+  iter_sec_ctx ctx = {};
+  ctx.total_bytes_hashed = size_of_headers;
 
   /* Build up the list of sections in the PE, in ascending order by PointerToRawData
    * (i.e., by file offset).
@@ -591,9 +604,11 @@ std::optional<std::string> calculate_checksum(peparse::parsed_pe *pe, checksum_k
       },
       &ctx);
 
+  uint32_t total_bytes_hashed = ctx.total_bytes_hashed;
+
   /* Copy each section's data into pe_bits, in ascending order.
    */
-  for (const auto &section : sections) {
+  for (const auto &section : ctx.sections) {
     pe_bits.insert(pe_bits.end(), section->buf, section->buf + section->bufLen);
   }
 

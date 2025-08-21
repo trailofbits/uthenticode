@@ -52,8 +52,12 @@ complete.
 and OpenSSL 3.0 or higher, which are installed via `vcpkg` by following these steps:
 
 ```bash
-cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=<vcpkg-path>/scripts/buildsystems/vcpkg.cmake
+# or set this in your shell environment/profile
+export VCPKG_ROOT=/path/to/vcpkg
+
+cmake -B build -S . --preset default
 cmake --build build
+
 # the default install prefix is the build directory;
 # use CMAKE_INSTALL_PREFIX to modify it
 cmake --build build --target install
