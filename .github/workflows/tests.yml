@@ -70,7 +70,7 @@ jobs:
           cmake \
             -B build \
             -S . \
-            --preset default \
+            --preset macos \
             -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
             -DBUILD_SHARED_LIBS=${{ matrix.build-shared.flag }} \
             -DBUILD_SVCLI=1 \
