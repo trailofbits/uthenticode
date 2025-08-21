@@ -232,7 +232,7 @@ bool SignedData::verify_signature() const {
      * in even the latest releases of OpenSSL as of 2023-05.
      */
     auto xku_flags = X509_get_extended_key_usage(signer);
-    if (!(xku_flags & XKU_CODE_SIGN)) {
+    if (!(xku_flags & (XKU_CODE_SIGN | XKU_TIMESTAMP))) {
       return false;
     }
   }
