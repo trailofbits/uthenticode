@@ -57,6 +57,8 @@ jobs:
          - { flag: "1", repr: "shared" }
          - { flag: "0", repr: "static" }
     runs-on: macos-latest
+    env:
+      VCPKG_FORCE_SYSTEM_BINARIES: 1
     steps:
       - uses: actions/checkout@v4
 
@@ -67,14 +69,16 @@ jobs:
 
       - name: configure
         run: |
+          export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
           cmake \
             -B build \
             -S . \
-            --preset default \
+            --preset macos \
             -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
             -DBUILD_SHARED_LIBS=${{ matrix.build-shared.flag }} \
             -DBUILD_SVCLI=1 \
-            -DBUILD_TESTS=1
+            -DBUILD_TESTS=1 \
+            -DCMAKE_OSX_SYSROOT=$SDKROOT
 
       - name: build
         run: cmake --build build
