@@ -255,23 +255,23 @@ bool SignedData::verify_signature() const {
   if (filtered_certs == nullptr) {
     return false;
   }
-  
+
   for (auto i = 0; i < sk_X509_num(certs); ++i) {
     auto *cert = sk_X509_value(certs, i);
 
     auto xku_flags = X509_get_extended_key_usage(cert);
-    
+
     /* Skip TSA certificates (those with only timestamp EKU) */
     if (xku_flags == XKU_TIMESTAMP) {
       continue;
     }
-    
+
     /* Require code signing EKU for all other certs */
     if (!(xku_flags & XKU_CODE_SIGN)) {
       sk_X509_free(filtered_certs);
       return false;
     }
-    
+
     /* Add non-TSA certificate to filtered stack */
     if (!sk_X509_push(filtered_certs, cert)) {
       sk_X509_free(filtered_certs);
@@ -318,8 +318,9 @@ bool SignedData::verify_signature() const {
    * We pass `nullptr` for the X509_STORE, since we don't do full-chain verification
    * (we can't, since we don't have access to Windows's Trusted Publishers store on non-Windows).
    */
-  auto status = PKCS7_verify(p7_, filtered_certs, nullptr, signed_data.get(), nullptr, PKCS7_NOVERIFY);
-  
+  auto status =
+      PKCS7_verify(p7_, filtered_certs, nullptr, signed_data.get(), nullptr, PKCS7_NOVERIFY);
+
   sk_X509_free(filtered_certs);
 
   return status == 1;
