@@ -242,17 +242,39 @@ bool SignedData::verify_signature() const {
      * in even the latest releases of OpenSSL as of 2023-05.
      */
     auto xku_flags = X509_get_extended_key_usage(signer);
-    if (!(xku_flags & (XKU_CODE_SIGN | XKU_TIMESTAMP))) {
+    if (!(xku_flags & XKU_CODE_SIGN)) {
       return false;
     }
   }
 
-  /* Check all embedded intermediates. */
+  /* Filter out TSA certificates and check remaining intermediates.
+   * TSA certificates (with only XKU_TIMESTAMP) must be excluded from
+   * the verification process to prevent signature bypass attacks.
+   */
+  STACK_OF(X509) *filtered_certs = sk_X509_new_null();
+  if (filtered_certs == nullptr) {
+    return false;
+  }
+  
   for (auto i = 0; i < sk_X509_num(certs); ++i) {
     auto *cert = sk_X509_value(certs, i);
 
     auto xku_flags = X509_get_extended_key_usage(cert);
-    if (!(xku_flags & (XKU_CODE_SIGN | XKU_TIMESTAMP))) {
+    
+    /* Skip TSA certificates (those with only timestamp EKU) */
+    if (xku_flags == XKU_TIMESTAMP) {
+      continue;
+    }
+    
+    /* Require code signing EKU for all other certs */
+    if (!(xku_flags & XKU_CODE_SIGN)) {
+      sk_X509_free(filtered_certs);
+      return false;
+    }
+    
+    /* Add non-TSA certificate to filtered stack */
+    if (!sk_X509_push(filtered_certs, cert)) {
+      sk_X509_free(filtered_certs);
       return false;
     }
   }
@@ -265,6 +287,7 @@ bool SignedData::verify_signature() const {
   std::uint8_t *indirect_data_buf = nullptr;
   auto buf_size = impl::i2d_Authenticode_SpcIndirectDataContent(indirect_data_, &indirect_data_buf);
   if (buf_size < 0 || indirect_data_buf == nullptr) {
+    sk_X509_free(filtered_certs);
     return false;
   }
   auto indirect_data_ptr =
@@ -275,24 +298,29 @@ bool SignedData::verify_signature() const {
   int tag = 0, tag_class = 0;
   ASN1_get_object(&signed_data_seq, &length, &tag, &tag_class, buf_size);
   if (tag != V_ASN1_SEQUENCE) {
+    sk_X509_free(filtered_certs);
     return false;
   }
 
   auto *signed_data_ptr = BIO_new_mem_buf(signed_data_seq, length);
   if (signed_data_ptr == nullptr) {
+    sk_X509_free(filtered_certs);
     return false;
   }
   impl::BIO_ptr signed_data(signed_data_ptr, BIO_free);
 
   /* Our actual verification happens here.
    *
-   * We pass `certs` explicitly, but (experimentally) we don't have to -- the function correctly
-   * extracts then from the SignedData in `p7_`.
+   * We pass `filtered_certs` (with TSA certs removed) explicitly to prevent
+   * signature bypass attacks where a TSA cert could be used instead of a
+   * proper code-signing cert.
    *
    * We pass `nullptr` for the X509_STORE, since we don't do full-chain verification
    * (we can't, since we don't have access to Windows's Trusted Publishers store on non-Windows).
    */
-  auto status = PKCS7_verify(p7_, certs, nullptr, signed_data.get(), nullptr, PKCS7_NOVERIFY);
+  auto status = PKCS7_verify(p7_, filtered_certs, nullptr, signed_data.get(), nullptr, PKCS7_NOVERIFY);
+  
+  sk_X509_free(filtered_certs);
 
   return status == 1;
 }

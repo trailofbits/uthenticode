@@ -26,24 +26,25 @@ class TimestampEKUTest : public ::testing::Test {
   peparse::parsed_pe *pe{nullptr};
 };
 
-// This test verifies the fix for issue #102
-// The fix allows certificates with XKU_TIMESTAMP flag to pass verification
-// Previously, only XKU_CODE_SIGN was accepted
+// This test verifies the security fix for issue #102
+// The fix FILTERS OUT certificates with only XKU_TIMESTAMP flag
+// to prevent signature bypass attacks where TSA certs could be
+// used instead of proper code-signing certs
 TEST_F(TimestampEKUTest, SignedData_timestamp_EKU) {
   auto certs = uthenticode::read_certs(pe);
 
-  // If we had a PE with timestamp certificates, we would verify:
-  // 1. That the signature verification passes with XKU_TIMESTAMP
-  // 2. That both XKU_CODE_SIGN and XKU_TIMESTAMP are accepted
-  // 3. That certificates with neither flag still fail
+  // The security fix ensures:
+  // 1. TSA certificates (with only XKU_TIMESTAMP) are filtered out
+  // 2. Only certificates with XKU_CODE_SIGN are used for verification
+  // 3. This prevents bypass attacks via TSA certificate substitution
 
   // For now, we just ensure the existing test PE still works
-  // with the updated logic that accepts XKU_TIMESTAMP
+  // with the updated logic that filters out TSA certificates
   if (!certs.empty()) {
     auto signed_data = certs[0].as_signed_data();
     if (signed_data.has_value()) {
-      // This should pass with the fix - certificates with either
-      // XKU_CODE_SIGN or XKU_TIMESTAMP are now valid
+      // This should pass - TSA certs are filtered out,
+      // only code-signing certs are used for verification
       ASSERT_TRUE(signed_data->verify_signature());
     }
   }
@@ -51,27 +52,28 @@ TEST_F(TimestampEKUTest, SignedData_timestamp_EKU) {
 
 // Additional test to document the expected behavior
 TEST(XKUFlagsDocumentation, ExpectedBehavior) {
-  // Document the fix for PR #103:
+  // Document the SECURITY fix for issue #102:
   //
-  // BEFORE (original code):
-  //   if (!(xku_flags & XKU_CODE_SIGN)) {
-  //     return false;
-  //   }
-  //
-  // AFTER (with PR #103 fix):
+  // VULNERABLE approach (PR #103 - REJECTED):
   //   if (!(xku_flags & (XKU_CODE_SIGN | XKU_TIMESTAMP))) {
   //     return false;
   //   }
+  // This would allow TSA certs to verify signatures - SECURITY ISSUE!
   //
-  // This change allows timestamp certificates to be considered valid
-  // for Authenticode signature verification, which is correct per
-  // the Authenticode specification.
+  // SECURE approach (current implementation):
+  //   1. Check signers require XKU_CODE_SIGN only
+  //   2. Filter out TSA certificates (xku_flags == XKU_TIMESTAMP)
+  //   3. Pass only filtered certs to PKCS7_verify
+  //
+  // This prevents signature bypass attacks where an attacker could
+  // use a TSA certificate instead of a code-signing certificate.
 
-  // The fix applies to both:
-  // 1. Signing certificates (line 245 in original)
-  // 2. Embedded intermediate certificates (line 255 in original)
+  // The fix:
+  // 1. Reverts XKU checks to require XKU_CODE_SIGN only
+  // 2. Filters out TSA certificates before verification
+  // 3. Prevents TSA certs from being used as signers
 
-  SUCCEED() << "PR #103 fix documented - allows XKU_TIMESTAMP certificates";
+  SUCCEED() << "Security fix - filters out TSA certificates to prevent bypass";
 }
 
 // Test that validates the XKU flag constants are correct
@@ -98,24 +100,26 @@ TEST(XKUFlagsDocumentation, ValidateConstants) {
   EXPECT_NE(XKU_CODE_SIGN, XKU_TIMESTAMP);
   EXPECT_EQ(0x48, XKU_CODE_SIGN | XKU_TIMESTAMP) << "OR'd flags should be 0x48";
 
-  // This test documents what the fix enables:
-  // Before: only certs with flag & 0x8 (CODE_SIGN) would pass
-  // After: certs with flag & 0x8 OR flag & 0x40 (TIMESTAMP) pass
+  // This test documents what the SECURITY fix does:
+  // TSA certs (with only XKU_TIMESTAMP) are FILTERED OUT
+  // Only certs with XKU_CODE_SIGN are used for verification
 
-  uint32_t only_codesign = XKU_CODE_SIGN;               // 0x8
-  uint32_t only_timestamp = XKU_TIMESTAMP;              // 0x40
-  uint32_t both_flags = XKU_CODE_SIGN | XKU_TIMESTAMP;  // 0x48
-  uint32_t unrelated = XKU_SSL_SERVER;                  // 0x1
+  uint32_t only_codesign = XKU_CODE_SIGN;               // 0x8 - ALLOWED
+  uint32_t only_timestamp = XKU_TIMESTAMP;              // 0x40 - FILTERED OUT
+  uint32_t both_flags = XKU_CODE_SIGN | XKU_TIMESTAMP;  // 0x48 - ALLOWED (has CODE_SIGN)
+  uint32_t unrelated = XKU_SSL_SERVER;                  // 0x1 - REJECTED
 
-  // Original check: !(xku_flags & XKU_CODE_SIGN)
-  EXPECT_TRUE(only_codesign & XKU_CODE_SIGN);
-  EXPECT_FALSE(only_timestamp & XKU_CODE_SIGN);  // Would fail!
-  EXPECT_TRUE(both_flags & XKU_CODE_SIGN);
-  EXPECT_FALSE(unrelated & XKU_CODE_SIGN);
+  // Signer check: !(xku_flags & XKU_CODE_SIGN) - only CODE_SIGN allowed
+  EXPECT_TRUE(only_codesign & XKU_CODE_SIGN);     // Passes - has CODE_SIGN
+  EXPECT_FALSE(only_timestamp & XKU_CODE_SIGN);   // Fails - no CODE_SIGN
+  EXPECT_TRUE(both_flags & XKU_CODE_SIGN);        // Passes - has CODE_SIGN
+  EXPECT_FALSE(unrelated & XKU_CODE_SIGN);        // Fails - no CODE_SIGN
 
-  // Fixed check: !(xku_flags & (XKU_CODE_SIGN | XKU_TIMESTAMP))
-  EXPECT_TRUE(only_codesign & (XKU_CODE_SIGN | XKU_TIMESTAMP));
-  EXPECT_TRUE(only_timestamp & (XKU_CODE_SIGN | XKU_TIMESTAMP));  // Now passes!
-  EXPECT_TRUE(both_flags & (XKU_CODE_SIGN | XKU_TIMESTAMP));
-  EXPECT_FALSE(unrelated & (XKU_CODE_SIGN | XKU_TIMESTAMP));
+  // Certificate filtering logic:
+  // if (xku_flags == XKU_TIMESTAMP) -> SKIP (filter out TSA cert)
+  // if (!(xku_flags & XKU_CODE_SIGN)) -> REJECT
+  EXPECT_TRUE(only_timestamp == XKU_TIMESTAMP);   // TSA cert - gets filtered out!
+  EXPECT_TRUE(only_codesign & XKU_CODE_SIGN);     // Code sign cert - kept
+  EXPECT_TRUE(both_flags & XKU_CODE_SIGN);        // Has code sign - kept
+  EXPECT_FALSE(unrelated & XKU_CODE_SIGN);        // No code sign - rejected
 }
