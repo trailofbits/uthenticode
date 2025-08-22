@@ -110,16 +110,16 @@ TEST(XKUFlagsDocumentation, ValidateConstants) {
   uint32_t unrelated = XKU_SSL_SERVER;                  // 0x1 - REJECTED
 
   // Signer check: !(xku_flags & XKU_CODE_SIGN) - only CODE_SIGN allowed
-  EXPECT_TRUE(only_codesign & XKU_CODE_SIGN);     // Passes - has CODE_SIGN
-  EXPECT_FALSE(only_timestamp & XKU_CODE_SIGN);   // Fails - no CODE_SIGN
-  EXPECT_TRUE(both_flags & XKU_CODE_SIGN);        // Passes - has CODE_SIGN
-  EXPECT_FALSE(unrelated & XKU_CODE_SIGN);        // Fails - no CODE_SIGN
+  EXPECT_TRUE(only_codesign & XKU_CODE_SIGN);    // Passes - has CODE_SIGN
+  EXPECT_FALSE(only_timestamp & XKU_CODE_SIGN);  // Fails - no CODE_SIGN
+  EXPECT_TRUE(both_flags & XKU_CODE_SIGN);       // Passes - has CODE_SIGN
+  EXPECT_FALSE(unrelated & XKU_CODE_SIGN);       // Fails - no CODE_SIGN
 
   // Certificate filtering logic:
   // if (xku_flags == XKU_TIMESTAMP) -> SKIP (filter out TSA cert)
   // if (!(xku_flags & XKU_CODE_SIGN)) -> REJECT
-  EXPECT_TRUE(only_timestamp == XKU_TIMESTAMP);   // TSA cert - gets filtered out!
-  EXPECT_TRUE(only_codesign & XKU_CODE_SIGN);     // Code sign cert - kept
-  EXPECT_TRUE(both_flags & XKU_CODE_SIGN);        // Has code sign - kept
-  EXPECT_FALSE(unrelated & XKU_CODE_SIGN);        // No code sign - rejected
+  EXPECT_TRUE(only_timestamp == XKU_TIMESTAMP);  // TSA cert - gets filtered out!
+  EXPECT_TRUE(only_codesign & XKU_CODE_SIGN);    // Code sign cert - kept
+  EXPECT_TRUE(both_flags & XKU_CODE_SIGN);       // Has code sign - kept
+  EXPECT_FALSE(unrelated & XKU_CODE_SIGN);       // No code sign - rejected
 }
